@@ -19,7 +19,10 @@ case class SExpList(items: Iterable[SExp]) extends SExp with Iterable[SExp] {
     "(" + items.map { _.toReadableString }.mkString(" ") + ")"
   }
 
-  def toKeywordMap(): Map[KeywordAtom, SExp] = {
+  type KeyMap = Map[KeywordAtom, SExp]
+
+
+  private def makeKeywordMap: KeyMap = {
     var m = Map[KeywordAtom, SExp]()
     items.sliding(2, 2).foreach {
       case (key: KeywordAtom) ::(sexp: SExp) :: rest => {
@@ -40,6 +43,44 @@ case class SExpList(items: Iterable[SExp]) extends SExp with Iterable[SExp] {
     }
     m
   }
+
+
+  private var mKm: Option[KeyMap] = None
+  def toKeywordMap: KeyMap = {
+    mKm match{
+      case Some(km) => km
+      case None =>{
+	val km = this.makeKeywordMap
+	mKm = Some(km)
+	km
+      }
+    }
+  }
+
+  def get(name: String): Option[SExp] = km.get(key(name))
+
+  def getStr(name: String): Option[String] = km.get(key(name)) match {
+    case Some(StringAtom(s)) => Some(s)
+    case _ => None
+  }
+  def getInt(name: String): Option[Int] = km.get(key(name)) match {
+    case Some(IntAtom(i)) => Some(i)
+    case _ => None
+  }
+  def getBool(name: String): Boolean = km.get(key(name)) match {
+    case Some(TruthAtom()) => true
+    case _ => false
+  }
+  def getStrList(name: String): List[String] = km.get(key(name)) match {
+    case Some(SExpList(items: Iterable[StringAtom])) => items.map { ea => ea.value }.toList
+    case _ => List()
+  }
+  def getRegexList(name: String): List[Regex] = km.get(key(name)) match {
+    case Some(SExpList(items: Iterable[StringAtom])) => items.map { ea => ea.value.r }.toList
+    case _ => List()
+  }
+
+
 }
 
 object BooleanAtom {
@@ -98,17 +139,16 @@ object SExp extends RegexParsers {
   lazy val truth = literal("t") ^^ { cs => TruthAtom() }
   lazy val expr: Parser[SExp] = list | nil | truth | keyword | sym | number | string
 
-  def read(r: Reader[Char]): SExp = {
+  def read(r: Reader[Char]): Either[String, SExp] = {
     val result: ParseResult[SExp] = expr(r)
     result match {
-      case Success(value, next) => value
+      case Success(value, next) => Right(value)
       case Failure(errMsg, next) => {
         println(errMsg)
-        NilAtom()
+        Left(errMsg)
       }
       case Error(errMsg, next) => {
-        println(errMsg)
-        NilAtom()
+	Left(errMsg)
       }
     }
   }
@@ -122,9 +162,9 @@ object SExp extends RegexParsers {
       (r findPrefixMatchOf (source.subSequence(start, source.length))) match {
         case Some(matched) => Success(matched, in.drop(start + matched.end - offset))
         case None =>
-          Failure("string matching regex `" + r +
-            "' expected but `" +
-            in.first + "' found", in.drop(start - offset))
+        Failure("string matching regex `" + r +
+          "' expected but `" +
+          in.first + "' found", in.drop(start - offset))
       }
     }
   }

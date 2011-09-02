@@ -13,11 +13,12 @@ object EnsimeBuild extends Build {
 
   val root = Path(".")
 
+  val ProjectVersion = "0.6.RC2"
 
   lazy val project = Project(
     "ensime",
     file (".")) settings(
-    version := "0.6.RC2",
+    version := ProjectVersion,
     organization := "org.ensime",
     scalaVersion := "2.9.0-1",
     resolvers += "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
@@ -33,7 +34,8 @@ object EnsimeBuild extends Build {
       //  "org.scala-refactoring" % "org.scala-refactoring.library" % "0.2.0-SNAPSHOT"%"compile;runtime;test",
       "net.sourceforge.expectj" % "expectj" % "2.0.1" % "compile;runtime;test",
       "asm" % "asm" % "3.2",
-      "asm" % "asm-commons" % "3.2"
+      "asm" % "asm-commons" % "3.2",
+      "org.clapper" %% "sbt-editsource" % "0.4.2"
     ),
     exportJars := true,
     stageTask,

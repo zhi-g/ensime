@@ -130,6 +130,44 @@ object FileUtils {
     }
   }
 
+  def copyFile(sourceFile:File, destFile:File): Either[Throwable, File] {
+    if (!destFile.exists()) {
+      destFile.createNewFile();
+    }
+    var fIn:FileInputStream = null;
+    var fOut:FileOutputStream = null;
+    var source:FileChannel = null;
+    var destination:FileChannel = null;
+    try {
+      fIn = new FileInputStream(sourceFile);
+      source = fIn.getChannel();
+      fOut = new FileOutputStream(destFile);
+      destination = fOut.getChannel();
+      val transfered:Long = 0;
+      val bytes:Long = source.size();
+      while (transfered < bytes) {
+	transfered += destination.transferFrom(source, 0, source.size());
+	destination.position(transfered);
+      }
+      Right(destFile)
+    } 
+    catch{
+      case t:Throwable => Left(Throwable)
+    }
+    finally {
+      if (source != null) {
+	source.close();
+      } else if (fIn != null) {
+	fIn.close();
+      }
+      if (destination != null) {
+	destination.close();
+      } else if (fOut != null) {
+	fOut.close();
+      }
+    }
+  }
+
   def replaceFileContents(file: File, newContents: String): Either[Exception, Unit] = {
     try {
       val writer = new FileWriter(file, false)
@@ -216,21 +254,21 @@ object FileUtils {
       }
 
       // Apply the changes. An error here may result in a corrupt disk state :(
-	changes.foreach {
-          case (file, newContents) => {
-            replaceFileContents(file, newContents) match {
-              case Right(_) => {}
-              case Left(e) => Right(Left(e))
-            }
+      changes.foreach {
+        case (file, newContents) => {
+          replaceFileContents(file, newContents) match {
+            case Right(_) => {}
+            case Left(e) => Right(Left(e))
           }
-	}
-
-	Right(Right(()))
-
-      } catch {
-	case e: Exception => Left(e)
+        }
       }
-    }
 
+      Right(Right(()))
+
+    } catch {
+      case e: Exception => Left(e)
+    }
   }
+
+}
 

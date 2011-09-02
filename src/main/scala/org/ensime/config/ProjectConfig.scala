@@ -33,38 +33,17 @@ trait FormatHandler {
 }
 
 object ProjectConfig {
-  class SExpFormatHandler(config: SExpList) extends FormatHandler {
-    val m = config.toKeywordMap
-    private def getStr(name: String): Option[String] = m.get(key(name)) match {
-      case Some(StringAtom(s)) => Some(s)
-      case _ => None
-    }
-    private def getInt(name: String): Option[Int] = m.get(key(name)) match {
-      case Some(IntAtom(i)) => Some(i)
-      case _ => None
-    }
-    private def getBool(name: String): Boolean = m.get(key(name)) match {
-      case Some(TruthAtom()) => true
-      case _ => false
-    }
-    private def getStrList(name: String): List[String] = m.get(key(name)) match {
-      case Some(SExpList(items: Iterable[StringAtom])) => items.map { ea => ea.value }.toList
-      case _ => List()
-    }
-    private def getRegexList(name: String): List[Regex] = m.get(key(name)) match {
-      case Some(SExpList(items: Iterable[StringAtom])) => items.map { ea => ea.value.r }.toList
-      case _ => List()
-    }
 
-    def rootDir(): Option[String] = getStr(":root-dir")
-    def useSbt(): Boolean = getBool(":use-sbt")
-    def useMaven(): Boolean = getBool(":use-maven")
-    def useIvy(): Boolean = getBool(":use-ivy")
-    private def sbtSubprojects: List[Map[KeywordAtom, SExp]] = {
-      m.get(key(":sbt-subprojects")) match {
+  class SExpFormatHandler(config: SExpList) extends FormatHandler {
+    def rootDir(): Option[String] = config.getStr(":root-dir")
+    def useSbt(): Boolean = config.getBool(":use-sbt")
+    def useMaven(): Boolean = config.getBool(":use-maven")
+    def useIvy(): Boolean = config.getBool(":use-ivy")
+    private def sbtSubprojects: List[SExpList]] = {
+      config.get(":sbt-subprojects") match {
         case Some(SExpList(items)) =>
         items.flatMap {
-          case lst: SExpList => Some(lst.toKeywordMap)
+          case lst: SExpList => Some(lst)
           case _ => None
         }.toList
         case _ => List()
@@ -72,7 +51,7 @@ object ProjectConfig {
     }
     private def sbtSubproject(projectName: String): Option[SbtSubproject] = {
       val proj = sbtSubprojects.find { ea =>
-        ea.get(key(":name")) match {
+        ea.get(":name") match {
           case Some(StringAtom(str)) => str == projectName
           case _ => false
         }
@@ -80,8 +59,8 @@ object ProjectConfig {
       proj match {
         case Some(p) => {
           Some(SbtSubproject(
-              p.get(key(":name")).getOrElse("NA").toString,
-              p.get(key(":deps")) match {
+              p.get(":name").getOrElse("NA").toString,
+              p.get(":deps") match {
 		case Some(SExpList(items)) => items.map(_.toString).toList
 		case _ => List()
               }))
@@ -107,7 +86,7 @@ object ProjectConfig {
     def sources(): List[String] = getStrList(":sources")
     def target(): Option[String] = getStr(":target")
     def projectName(): Option[String] = getStr(":project-name")
-    def formatPrefs(): Map[Symbol, Any] = m.get(key(":formatting-prefs")) match {
+    def formatPrefs(): Map[Symbol, Any] = config.get(":formatting-prefs") match {
       case Some(list: SExpList) => {
         list.toKeywordMap.map {
           case (KeywordAtom(key), sexp: SExp) => (Symbol(key.substring(1)), sexp.toScala)

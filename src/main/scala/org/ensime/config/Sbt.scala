@@ -10,269 +10,156 @@ case class SbtSubproject(name: String, deps: List[String])
 
 object Sbt extends ExternalConfigurator {
 
-  class IndexTracker(var i: Int)
-  private implicit object IndexTracker extends IndexTracker(0)
+  
+  trait SbtVersion {
 
-  private def mostRecentStr(implicit x: IndexTracker, shell: Spawn): String = {
-    val all = shell.getCurrentStandardOutContents()
-    val s = all.substring(x.i)
-    x.i = all.length
-    s
+    def pluginSourceFilename:String
+
+    def pluginFilename:String
+    
+    def taskName:String
+
+    def getConfigurationDump(baseDir: File, project: Option[String]):Either[Throwable, String]
+
+    def runTask(baseDir: File, jar: File, project: Option[String]): Either[Throwable, String] = {
+
+      val task = project match {
+	case Some(p) => "\"" + taskName + " " + p + "\""
+	case None => taskName
+      }
+
+      val pb = new ProcessBuilder("java", "-Dsbt.log.noformat=true", "-jar",
+	jar.getCanonicalPath(), task)
+      pb.directory(baseDir)
+      ProcessUtil.readAllOutput(pb.start()) match{
+	case Right((stdout, stderr)) => Right(stdout)
+	case Left(t:Throwable) => Left(t)
+      }
+    }
   }
 
-  private object sbt7{
 
-    val delim = "%%ENSIME%%"
-    def expandDelim = delim.map("\"" + _ + "\"").mkString(" + ")
-    def isolated(str: String) = expandDelim + " + " + str + " + " + expandDelim
-    def printIsolated(str: String) = "println(" + isolated(str) + ")\n"
-    val pattern: Pattern = Pattern.compile(delim + "(.+?)" + delim)
-    val prompt: String = "scala> "
+  object Sbt10 extends SbtVersion{
 
-    def parseValues(input: String): Option[String] = {
-      val m = pattern.matcher(input);
-      if (m.find()) Some(m.group(1))
-      else None
-    }
+    def pluginSourceFilename:String = "EnsimePlugin_Sbt10.scala"
 
-    def eval(expr: String)(implicit shell: Spawn): String = {
-      shell.send(printIsolated(expr))
-      shell.expect(prompt)
-      parseValues(mostRecentStr) match {
-	case Some(s) => s
-	case _ => throw new RuntimeException("Failed to parse result of " + expr)
-      }
-    }
+    def pluginFilename:String = "plugin.scala"
 
-    def evalUnit(expr: String)(implicit shell: Spawn): Unit = {
-      shell.send(expr + "\n")
-      shell.expect(prompt)
-    }
+    def taskName:String = "ensime-dump-config"
 
-    def evalList(expr: String)(implicit shell: Spawn): List[String] = {
-      shell.send(printIsolated(expr))
-      shell.expect(prompt)
-      parseValues(mostRecentStr) match {
-	case Some(s) if (s.startsWith("List(") && s.endsWith(")")) => {
-          (s.substring(5, s.length - 1)).split(", ").toList
-	}
-	case _ => throw new RuntimeException("Failed to parse result of " + expr)
-      }
-    }
-
-    def spawn(baseDir: File): Spawn = {
-      val expectinator = new ExpectJ()
-      val pathToSbtJar = (new File(".", "bin/sbt-launch-0.7.7.jar")).getCanonicalPath()
-      expectinator.spawn(new Executor(){
-	  def execute():Process = {
-	    val pb = new ProcessBuilder("java", "-Dsbt.log.noformat=true", "-jar", pathToSbtJar, "console-project")
-	    pb.directory(baseDir)
-	    pb.start()
-	  }
-	  override def toString():String = "ENSIME-controlled sbt7 process"
-	})
+    def getConfigurationDump(baseDir: File, project: Option[String]):Either[Throwable, String] = {
+      runTask(baseDir, new File(".", "bin/sbt-launch-0.10.1.jar"), project)
     }
 
   }
 
 
-  private object sbt10{
-    val singleLineSetting: Pattern = Pattern.compile("^\\[info\\] (.+)$", Pattern.MULTILINE)
-    val prompt: String = "> "
+  object Sbt7 extends SbtVersion{
 
-    def parseSettingStr(input: String): Option[String] = {
-      val m = singleLineSetting.matcher(input);
-      var result: Option[String] = None
-      while (m.find()) {
-	result = Some(m.group(1))
-      }
-      result
+    def pluginSourceFilename:String = "EnsimePlugin_Sbt7.scala"
+
+    def pluginFilename:String = "Ensime_Sbt7_" +  + ".scala"
+
+    def taskName:String = "ensime-dump-config"
+
+    def getConfigurationDump(baseDir: File, project: Option[String]):Either[Throwable, String] = {
+      runTask(baseDir, new File(".", "bin/sbt-launch-0.7.7.jar"), project)
     }
-
-    def evalNoop()(implicit shell: Spawn): Unit = {
-      shell.send("noop\n")
-      shell.expect(prompt)
-      mostRecentStr
-    }
-
-    def evalUnit(expr: String)(implicit shell: Spawn): Unit = {
-      shell.send(expr + "\n")
-      shell.expect(prompt)
-      mostRecentStr
-    }
-
-    def showSetting(expr: String)(implicit shell: Spawn): String = {
-      shell.send("show " + expr + "\n")
-      shell.expect(prompt)
-      parseSettingStr(mostRecentStr) match {
-	case Some(s) => s
-	case _ => throw new RuntimeException("Failed to parse result of " + expr)
-      }
-    }
-
-    import scala.util.parsing.input._
-    import scala.util.parsing.combinator._
-    object ListParser extends RegexParsers {
-      def listOpen = regex(new Regex("List\\("))
-      def listClose = regex(new Regex("\\)"))
-      def attrOpen = regex(new Regex("Attributed\\("))
-      def attrClose = regex(new Regex("\\)"))
-      def list = listOpen ~> repsep(file, ", ") <~ listClose
-      def file = (attrFile | unAttrFile)
-      def attrFile = attrOpen ~> unAttrFile <~ attrClose
-      def unAttrFile = regex(new Regex("[^\\),]+"))
-    }
-
-    def parseAttributedFilesList(s: String):List[String] = {
-      val result: ListParser.ParseResult[List[String]] = ListParser.list(
-	new CharSequenceReader(s))
-      result match {
-	case ListParser.Success(value, next) => value
-	case ListParser.Failure(errMsg, next) => {
-	  System.err.println(errMsg)
-	  List()
-	}
-	case ListParser.Error(errMsg, next) => {
-	  System.err.println(errMsg)
-	  List()
-	}
-      }
-    }
-
-    def spawn(baseDir: File): Spawn = {
-      val expectinator = new ExpectJ()
-      val pathToSbtJar = (new File(".", "bin/sbt-launch-0.10.1.jar")).getCanonicalPath()
-      expectinator.spawn(new Executor(){
-	  def execute():Process = {
-	    val pb = new ProcessBuilder("java", "-Dsbt.log.noformat=true", "-jar", pathToSbtJar)
-	    pb.directory(baseDir)
-	    pb.start()
-	  }
-	  override def toString():String = "ENSIME-controlled sbt10 process"
-	})
-    }
-
-
   }
 
-  def getConfig(baseDir: File, conf: FormatHandler): Either[Throwable, ExternalConfig] = {
+
+  def getSbt(baseDir: File): SbtVersion = {
     val props = JavaProperties.load(new File(baseDir, "project/build.properties"))
     props.get("sbt.version") match {
       case Some(v:String) => {
-	if (v.startsWith("0.10")) getConfig10(baseDir, conf)
-	else if(v.startsWith("0.7")) getConfig7(baseDir, conf)
-	else Left(new RuntimeException("Unrecognized sbt version: " + v))
+	if(v.startsWith("0.7")) Sbt7
+	else Sbt10
       }
-      case None => getConfig10(baseDir, conf)
+      case None => Sbt10
     }
   }
 
-  private def getConfig10(baseDir: File, conf: FormatHandler): Either[Throwable, ExternalConfig] = {
-    import sbt10._
-    implicit val shell = spawn(baseDir)
 
-    shell.expect(prompt)
-
-    conf.sbtActiveSubproject match {
-      case Some(sub) => {
-	evalUnit("project " + sub.name)
+  def getConfig(baseDir: File, conf: FormatHandler): Either[Throwable, ExternalConfig] = {
+    val sbt = getSbt(baseDir)
+    ensurePluginExists(baseDir, sbt) match{
+      case Right(_) => {
+	sbt.getConfigurationDump(
+	  baseDir, conf.sbtActiveSubproject.map(_.name)) match{
+	  case Right(src) => parseConfig(src, baseDir, conf)
+	  case Left(err) => Left(err)
+	}
       }
-      case None =>
+      case Left(err) => Left(err)
     }
-
-    evalNoop()
-
-    val name = showSetting("name")
-    val org = showSetting("organization")
-    val projectVersion = showSetting("version")
-    val buildScalaVersion = showSetting("scala-version")
-
-    val compileDeps = parseAttributedFilesList(showSetting("compile:dependency-classpath"))
-    val testDeps = (
-      //      parseAttributedFilesList(showSetting("test:external-dependency-classpath")) ++ 
-      parseAttributedFilesList(showSetting("test:managed-classpath")) ++ 
-      parseAttributedFilesList(showSetting("test:unmanaged-classpath"))
-    )
-    val runtimeDeps = (
-      //      parseAttributedFilesList(showSetting("runtime:external-dependency-classpath")) ++ 
-      parseAttributedFilesList(showSetting("runtime:managed-classpath")) ++ 
-      parseAttributedFilesList(showSetting("runtime:unmanaged-classpath"))
-    )
-    val sourceRoots = parseAttributedFilesList(showSetting("source-directories"))
-    val target = CanonFile(showSetting("class-directory"))
-
-    shell.send("exit\n")
-    shell.expectClose()
-    shell.stop()
-
-    import FileUtils._
-
-    val compileDepFiles = maybeFiles(compileDeps, baseDir)
-    val testDepFiles = maybeFiles(testDeps, baseDir)
-    val runtimeDepFiles = maybeFiles(runtimeDeps, baseDir)
-    val sourceRootFiles = maybeDirs(sourceRoots, baseDir)
-
-    Right(ExternalConfig(Some(name), sourceRootFiles,
-	runtimeDepFiles, compileDepFiles, testDepFiles,
-	Some(target)))
   }
 
-  private def getConfig7(baseDir: File, conf: FormatHandler): Either[Throwable, ExternalConfig] = {
-    import sbt7._
-    try {
+  def ensurePluginExists(baseDir: File, 
+    sbt: SbtVersion): Either[Throwable, File] = {
+    try{
 
-      // ExpectJ object with a timeout of 5s
-      implicit val shell = spawn(baseDir)
+      val plugs = new File(baseDir, "./project/plugins")
+      if(!plugs.exists()){
+	val success = plugs.mkdir()
+	if(!success) throw new RuntimeException(
+	  "Failed to create directory: " + plugs)
+      }
 
-      shell.expect(prompt)
-
-      conf.sbtActiveSubproject match {
-	case Some(sub) => {
-          evalUnit("val p = subProjects.values.find(_.name == \"" + sub.name + "\").get.asInstanceOf[DefaultProject]")
-          // Fail fast if subproject was not found...
-          eval("p.name")
-	}
-	case None => {
-          evalUnit("val p = current")
+      val plugin = new File(baseDir, 
+	"./project/plugins/" + sbt.pluginFilename)
+      if(!plugin.exists()){
+	val pluginSrc = new File("./etc/" + sbt.pluginSourceFilename)
+	FileUtil.copyFile(pluginSrc, plugin) match{
+	  case Left(t) => {
+	    t.printStackTrace()
+	    throw new RuntimeException(
+	      "Failed to copy " + pluginSrc + " to " + plugin)
+	  }
+	  case _ => {}
 	}
       }
 
-      val name = eval("p.name")
-      val org = eval("p.organization")
-      val sbtVersion = eval("sbtVersion.value")
-      val projectVersion = eval("p.version")
-      val buildScalaVersion = eval("p.buildScalaVersion")
-      val compileDeps = evalList("(p.compileClasspath +++ p.fullClasspath(Configurations.Test)).get.toList.map(_.toString)")
-      val testDeps = evalList("(p.testClasspath).get.toList.map(_.toString)")
-      val runtimeDeps = evalList("(p.runClasspath  +++ p.fullClasspath(Configurations.Test)).get.toList.map(_.toString)")
-      val sourceRoots = evalList("(p.mainSourceRoots +++ p.testSourceRoots).get.toList.map(_.toString)")
-      val target = eval("p.outputPath.toString")
-
-      shell.send(":q\n")
-      shell.expectClose()
-      shell.stop()
-
-      import FileUtils._
-      val compileDepFiles = maybeFiles(compileDeps, baseDir)
-      val testDepFiles = maybeFiles(testDeps, baseDir)
-      val runtimeDepFiles = maybeFiles(runtimeDeps, baseDir)
-      val sourceRootFiles = maybeDirs(sourceRoots, baseDir)
-      val f = new File(baseDir, target)
-      val targetDir = if (f.exists) { Some(toCanonFile(f)) } else { None }
-
-      Right(ExternalConfig(Some(name), sourceRootFiles,
-          runtimeDepFiles, compileDepFiles, testDepFiles,
-          targetDir))
-
-    } catch {
-      case e: expectj.TimeoutException => Left(e)
-      case e: Exception => Left(e)
+      Right(plugin)
     }
+    catch{
+      case t:Throwable => Left(t)
+    }
+  }
 
+  def parseConfig(src: String, baseDir: File, conf: FormatHandler): Either[Throwable, ExternalConfig] = {
+
+    SExp.read(new input.CharArrayReader(buf)) match{
+      case Left(errMsg) => Left(new RuntimeException(errMsg))
+      case Right(sexp:SExpList) => {
+	val name = sexp.getStr("name")
+	val org = sexp.getStr("organization")
+	val projectVersion = sexp.getStr("project-version")
+	val projectVersion = sexp.getStr("scala-build-version")
+	val compileDeps = sexp.getStrList("compile-deps")
+	val testDeps = sexp.getStrList("test-deps")
+	val runtimeDeps = sexp.getStrList("runtime-deps")
+	val sourceRoots = sexp.getStrList("source-roots")
+	val target = sexp.getStrList("target")
+
+	import FileUtils._
+	val compileDepFiles = maybeFiles(compileDeps, baseDir)
+	val testDepFiles = maybeFiles(testDeps, baseDir)
+	val runtimeDepFiles = maybeFiles(runtimeDeps, baseDir)
+	val sourceRootFiles = maybeDirs(sourceRoots, baseDir)
+	val f = new File(baseDir, target)
+	val targetDir = if (f.exists) { Some(toCanonFile(f)) } else { None }
+
+	Right(ExternalConfig(Some(name), sourceRootFiles,
+            runtimeDepFiles, compileDepFiles, testDepFiles,
+            targetDir))
+      }
+
+      case Right(_) => Left(new RuntimeException(
+	  "Failed to parse SExpList from sbt output."))
+    }
   }
 
   def main(args: Array[String]) {
     //    println(getConfig(new File("."), None))
   }
-
 }
