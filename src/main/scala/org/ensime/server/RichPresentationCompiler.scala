@@ -23,6 +23,14 @@ trait RichCompilerControl extends CompilerControl with RefactoringControl { self
     result.get.fold(o => o, handle)
   }
 
+  def askOrLazy[A](op: => A, handle: Throwable => A): A = {
+    val result = new Response[A]()
+    scheduler postWorkItem new WorkItem {
+      def apply() = respond(result)(op)
+    }
+    result.get.fold(o => o, handle)
+  }
+
   def askSymbolInfoAt(p: Position): Option[SymbolInfo] = askOr(
     symbolAt(p).fold(s => Some(SymbolInfo(s)), t => None), t => None)
 
@@ -96,6 +104,10 @@ trait RichCompilerControl extends CompilerControl with RefactoringControl { self
 
   def askUsesOfSymAtPoint(p: Position): List[RangePosition] = askOr({
       usesOfSymbolAtPoint(p).toList
+    }, t => List())
+
+  def askSymbolDesignationsInRegion(p: RangePosition): List[SymbolDesignation] = askOr({
+      symbolDesignationsInRegion(p)
     }, t => List())
 
   def askClearTypeCache() = clearTypeCache
@@ -478,6 +490,10 @@ with RefactoringImpl with IndexerInterface {
       }
       case Right(e) => List()
     }
+  }
+
+  protected def symbolDesignationsInRegion(p: RangePosition): List[SymbolDesignation] = {
+    List()
   }
 
   private var notifyWhenReady = false
