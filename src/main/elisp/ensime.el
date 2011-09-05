@@ -2856,6 +2856,10 @@ with the current project's dependencies loaded. Returns a property list."
 (defun ensime-rpc-refactor-cancel (proc-id)
   (ensime-eval-async `(swank:cancel-refactor ,proc-id) #'identity))
 
+(defun ensime-rpc-symbol-designations (file start end)
+  (ensime-eval-async `(swank:symbol-designations ,file ,start ,end)
+		     #'(lambda (info) (message "%S" info))))
+
 
 
 ;; Uses UI

@@ -9,6 +9,7 @@ import scala.actors._
 import scala.actors.Actor._
 import scala.collection.{ Iterable }
 import scala.collection.mutable.{ ListBuffer }
+import scala.tools.nsc.util.RangePosition
 import scala.tools.nsc.{ Settings }
 import scala.tools.nsc.ast._
 import scala.tools.nsc.util.{ OffsetPosition }
@@ -251,6 +252,14 @@ class Analyzer(val project: Project, val protocol: ProtocolConversions, val conf
                     }
                     project ! RPCResultEvent(result, callId)
                   }
+
+                  case SymbolDesignationsReq(file: File, start: Int, end:Int) => {
+		    val f = scalaCompiler.sourceFileForPath(file.getAbsolutePath())
+		    val pos = new RangePosition(f, start, start, end)
+                    val syms = scalaCompiler.askSymbolDesignationsInRegion(pos)
+                    project ! RPCResultEvent(toWF(syms.map(toWF)), callId)
+                  }
+
                 }
               }
             } catch {

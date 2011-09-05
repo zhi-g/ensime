@@ -397,6 +397,15 @@ trait SwankProtocol extends Protocol {
         }
       }
 
+      case "swank:symbol-designations" => {
+        form match {
+          case SExpList(head :: StringAtom(filename) :: IntAtom(start) :: IntAtom(end) :: body) => {
+            rpcTarget.rpcSymbolDesignations(filename, start, end, callId)
+          }
+          case _ => oops
+        }
+      }
+
       case other => {
         sendRPCError(
           ErrUnrecognizedRPC,
@@ -764,6 +773,13 @@ trait SwankProtocol extends Protocol {
     SExp.propList(
       (":id", value.id),
       (":touched-files", SExpList(value.touched.map(f => strToSExp(f.getAbsolutePath)))))
+  }
+
+  def toWF(value: SymbolDesignation): SExp = {
+    SExp.propList(
+      (":start", value.start),
+      (":end", value.end),
+      (":type", value.declaredAs))
   }
 
   private def changeToWF(ch: Change): SExp = {
