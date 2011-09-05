@@ -74,9 +74,9 @@ trait SwankProtocol extends Protocol {
 
   def sendBackgroundMessage(code: Int, detail: Option[String]) {
     sendMessage(SExp(
-      key(":background-message"),
-      code,
-      detail.map(strToSExp).getOrElse(NilAtom())))
+	key(":background-message"),
+	code,
+	detail.map(strToSExp).getOrElse(NilAtom())))
   }
 
   def handleIncomingMessage(msg: Any) {
@@ -104,7 +104,7 @@ trait SwankProtocol extends Protocol {
           handleRPCRequest(name, form, callId)
         } catch {
           case e: Throwable =>
-            {
+          {
             e.printStackTrace(System.err)
             sendRPCError(ErrExceptionInRPC, Some(e.getMessage), callId)
           }
@@ -429,11 +429,11 @@ trait SwankProtocol extends Protocol {
   def sendRPCReturn(value: WireFormat, callId: Int) {
     value match {
       case sexp: SExp =>
-        {
+      {
         sendMessage(SExp(
-          key(":return"),
-          SExp(key(":ok"), sexp),
-          callId))
+            key(":return"),
+            SExp(key(":ok"), sexp),
+            callId))
       }
       case _ => throw new IllegalStateException("Not a SExp: " + value)
     }
@@ -441,11 +441,11 @@ trait SwankProtocol extends Protocol {
 
   def sendRPCError(code: Int, detail: Option[String], callId: Int) {
     sendMessage(SExp(
-      key(":return"),
-      SExp(key(":abort"),
-        code,
-        detail.map(strToSExp).getOrElse(NilAtom())),
-      callId))
+	key(":return"),
+	SExp(key(":abort"),
+          code,
+          detail.map(strToSExp).getOrElse(NilAtom())),
+	callId))
   }
 
   def sendProtocolError(code: Int, detail: Option[String]) {
@@ -642,7 +642,7 @@ trait SwankProtocol extends Protocol {
   def toWF(value: TypeInfo): SExp = {
     value match {
       case value: ArrowTypeInfo =>
-        {
+      {
         SExp.propList(
           (":name", value.name),
           (":type-id", value.id),
@@ -651,7 +651,7 @@ trait SwankProtocol extends Protocol {
           (":param-sections", SExp(value.paramSections.map(toWF))))
       }
       case value: TypeInfo =>
-        {
+      {
         SExp.propList((":name", value.name),
           (":type-id", value.id),
           (":full-name", value.fullName),
@@ -681,8 +681,8 @@ trait SwankProtocol extends Protocol {
   def toWF(value: ParamSectionInfo): SExp = {
     SExp.propList(
       (":params", SExp(value.params.map {
-        case (nm, tp) => SExp(nm, toWF(tp))
-      })),
+            case (nm, tp) => SExp(nm, toWF(tp))
+	  })),
       (":is-implicit", value.isImplicit))
 
   }
@@ -698,9 +698,9 @@ trait SwankProtocol extends Protocol {
       (":type", toWF(value.tpe)),
       (":info-type", 'typeInspect),
       (":companion-id", value.companionId match {
-        case Some(id) => id
-        case None => 'nil
-      }), (":interfaces", SExp(value.supers.map(toWF))))
+          case Some(id) => id
+          case None => 'nil
+	}), (":interfaces", SExp(value.supers.map(toWF))))
   }
 
   def toWF(value: RefactorFailure): SExp = {
@@ -775,11 +775,13 @@ trait SwankProtocol extends Protocol {
       (":touched-files", SExpList(value.touched.map(f => strToSExp(f.getAbsolutePath)))))
   }
 
-  def toWF(value: SymbolDesignation): SExp = {
+  def toWF(value: SymbolDesignations): SExp = {
     SExp.propList(
-      (":start", value.start),
-      (":end", value.end),
-      (":type", value.declaredAs))
+      (":file", value.file),
+      (":syms", 
+	SExpList(value.syms.map{s => 
+	    SExpList(List(s.symType, s.start, s.end))
+	  })))
   }
 
   private def changeToWF(ch: Change): SExp = {

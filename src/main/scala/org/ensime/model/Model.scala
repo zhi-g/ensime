@@ -19,10 +19,14 @@ class MethodSearchResult(name: String, localName: String, declaredAs: scala.Symb
 case class ImportSuggestions(symLists: Iterable[Iterable[SymbolSearchResult]])
 case class SymbolSearchResults(syms: Iterable[SymbolSearchResult])
 
+case class SymbolDesignations(
+  val file: String,
+  val syms: List[SymbolDesignation])
+
 case class SymbolDesignation(
   val start: Int,
   val end: Int,
-  val declaredAs: scala.Symbol)
+  val symType: scala.Symbol)
 
 
 class SymbolInfo(

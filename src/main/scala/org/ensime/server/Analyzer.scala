@@ -257,7 +257,7 @@ class Analyzer(val project: Project, val protocol: ProtocolConversions, val conf
 		    val f = scalaCompiler.sourceFileForPath(file.getAbsolutePath())
 		    val pos = new RangePosition(f, start, start, end)
                     val syms = scalaCompiler.askSymbolDesignationsInRegion(pos)
-                    project ! RPCResultEvent(toWF(syms.map(toWF)), callId)
+                    project ! RPCResultEvent(toWF(syms), callId)
                   }
 
                 }
