@@ -1,0 +1,4912 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+          "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+  <meta name="GENERATOR" content="TtH 3.85">
+  <style type="text/css"> div.p { margin-top: 7pt;}</style>
+  <style type="text/css">
+    td div.comp { margin-top: -0.6ex; margin-bottom: -1ex;}
+    td div.comb { margin-top: -0.6ex; margin-bottom: -.6ex;}
+    td div.hrcomp { line-height: 0.9; margin-top: -0.8ex; margin-bottom: -1ex;}
+    td div.norm {line-height:normal;}
+    span.roman {font-family: serif; font-style: normal; font-weight: normal;} 
+    span.overacc2 {position: relative;  left: .8em; top: -1.2ex;}
+    span.overacc1 {position: relative;  left: .6em; top: -1.2ex;}
+  </style>
+  <style type="text/css"> 
+    body{ 
+    background-color: #F7F7F7;
+    font-family: sans-serif;
+    text-align: center; 
+    color:#2B373D;
+    margin-bottom: 100px;
+    font-size: 10pt;
+    }
+    #container { 
+    width: 750px; 
+    text-align: left;
+    }
+    a{
+    color: #1E83CB;
+    }
+    b{
+    font-weight: bold;
+    font-size: 100%;
+    }
+    h1{
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-size: 240%;
+    }
+    h2{
+    margin-top: 70px;
+    margin-bottom: 50px;
+    font-size: 210%;
+    }
+    h3{
+    margin-top: 40px;
+    font-size: 150%;
+    }
+    h4{
+    margin-top: 30px;
+    font-size: 120%;
+    }
+    pre{
+    color: #333333;
+    font-weight: normal;
+    }
+    table td{
+    border: 1px solid #CCCCCC;
+    padding: 5px 5px 5px 5px;
+    }
+    table{
+    margin-left: 10px;
+    border: 1px solid #CCCCCC;
+    font-weight: normal;
+    font-size: 100%;
+    }
+  </style>
+
+
+
+  <center>
+    <div id="container">
+
+      
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+<div class="p"><!----></div>
+
+
+  
+<title>ENSIME User Manual</title>
+    
+<h1 align="center">ENSIME User Manual </h1>
+
+<h3 align="center">Aemon Cannon </h3>
+
+<div class="p"><!----></div>
+ 
+<center><b>Last Updated</b>: 07/07/2012
+</center>
+
+<div class="p"><!----></div>
+
+<h1>Contents </h1><a href="#tth_sEc1"
+>1&nbsp; Introduction</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc1.1"
+>1.1&nbsp; What is ENSIME?</a><br />
+<a href="#tth_sEc2"
+>2&nbsp; Installation</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc2.1"
+>2.1&nbsp; System Requirements</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc2.2"
+>2.2&nbsp; Getting Started</a><br />
+<a href="#tth_sEc3"
+>3&nbsp; Creating a Project</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.1"
+>3.1&nbsp; Generating a Config File</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.1.1"
+>3.1.1&nbsp; Using sbt to Generate a Config File</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.1.2"
+>3.1.2&nbsp; Generating Configs for Other Project Types</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.2"
+>3.2&nbsp; Notes on Specific Project Types</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.2.1"
+>3.2.1&nbsp; SBT</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.2.2"
+>3.2.2&nbsp; Other</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc3.3"
+>3.3&nbsp; Config File Format</a><br />
+<a href="#tth_sEc4"
+>4&nbsp; Usage</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.1"
+>4.1&nbsp; Startup</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.2"
+>4.2&nbsp; Symbol and Member Completion</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.3"
+>4.3&nbsp; Type/Package Inspector</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.4"
+>4.4&nbsp; The Scala REPL</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.5"
+>4.5&nbsp; Incremental Building</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.6"
+>4.6&nbsp; Debugging</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.7"
+>4.7&nbsp; Refactoring</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.8"
+>4.8&nbsp; Global Type and Method Search</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.9"
+>4.9&nbsp; Source Formatting</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.10"
+>4.10&nbsp; Semantic Highlighting</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.11"
+>4.11&nbsp; Scaladoc and Javadoc Browsing (customizing)</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc4.12"
+>4.12&nbsp; Command Reference</a><br />
+<a href="#tth_sEc5"
+>5&nbsp; Troubleshooting</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc5.1"
+>5.1&nbsp; Diagnosing Issues</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc5.2"
+>5.2&nbsp; Emacs Binary Search Path</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEc5.3"
+>5.3&nbsp; Custom JVM Options</a><br />
+<a href="#tth_sEcA"
+>A&nbsp; Installation from Git Clone</a><br />
+<a href="#tth_sEcB"
+>B&nbsp; Running the End-to-End ENSIME Tests</a><br />
+<a href="#tth_sEcC"
+>C&nbsp; Using the ENSIME Server with Other Editors</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.1"
+>C.1&nbsp; Starting the Server</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.2"
+>C.2&nbsp; The Swank Protocol</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3"
+>C.3&nbsp; ENSIME Swank RPC: Version 0.7.4</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.1"
+>C.3.1&nbsp; Protocol Change Log</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.2"
+>C.3.2&nbsp; Important Datastructures</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.3"
+>C.3.3&nbsp; RPC Calls</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.4"
+>C.3.4&nbsp; Events</a><br />
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.4"
+>C.4&nbsp; Other Protocols</a><br />
+
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc1">
+1</a>&nbsp;&nbsp;Introduction</h2>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc1.1">
+1.1</a>&nbsp;&nbsp;What is ENSIME?</h3>
+ENSIME is the ENhanced Scala Interaction Mode for Emacs. It provides many features that are commonly found only in IDEs, such as live error-checking, symbol inspection, package/type browsing, and basic refactorings. ENSIME's architecture is client/server: a thin Emacs client communicates with an analysis server written in Scala. The client component is based heavily on the SLIME environment for Common Lisp - using the same Swank RPC protocol. The server component services these calls using an instance of the official Scala compiler, so the results should always be consistent with the commandline compiler.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc2">
+2</a>&nbsp;&nbsp;Installation</h2>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc2.1">
+2.1</a>&nbsp;&nbsp;System Requirements</h3>
+
+<div class="p"><!----></div>
+
+<ul>
+<li> Emacs 22 or later (23 is recommended)
+<div class="p"><!----></div>
+</li>
+
+<li> Linux, Mac OSX, Windows
+<div class="p"><!----></div>
+</li>
+
+<li> JVM Version 6
+<div class="p"><!----></div>
+</li>
+
+<li> Scala 2.8.x or 2.9.x compatible project
+<div class="p"><!----></div>
+</li>
+</ul>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc2.2">
+2.2</a>&nbsp;&nbsp;Getting Started</h3>
+<a name="sec:install">
+</a>
+
+<div class="p"><!----></div>
+<b>scala-mode</b>:<br />
+Although it's not required, ENSIME is designed to compliment scala-mode. scala-mode can be found in the Scala distribution under misc/scala-tool-support/emacs/<br />
+
+<div class="p"><!----></div>
+<b>ensime-mode</b>:<br />
+Download the latest ENSIME distribution from github.com at 
+<pre>http://github.com/aemoncannon/ensime/downloads
+</pre> Make sure you get the version that is appropriate for your Scala version. Unpack the ENSIME distribution into a directory of your choosing, and add the following lines to your .emacs file:
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+;;&nbsp;Load&nbsp;the&nbsp;ensime&nbsp;lisp&nbsp;code...
+(add-to-list&nbsp;'load-path&nbsp;"ENSIME_ROOT/elisp/")
+(require&nbsp;'ensime)
+
+;;&nbsp;This&nbsp;step&nbsp;causes&nbsp;the&nbsp;ensime-mode&nbsp;to&nbsp;be&nbsp;started&nbsp;whenever
+;;&nbsp;scala-mode&nbsp;is&nbsp;started&nbsp;for&nbsp;a&nbsp;buffer.&nbsp;You&nbsp;may&nbsp;have&nbsp;to&nbsp;customize&nbsp;this&nbsp;step
+;;&nbsp;if&nbsp;you're&nbsp;not&nbsp;using&nbsp;the&nbsp;standard&nbsp;scala&nbsp;mode.
+(add-hook&nbsp;'scala-mode-hook&nbsp;'ensime-scala-mode-hook)
+
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+<b>Create a .ensime config file</b>:<br />
+See section <a href="#sec:config">3.1</a>.<br />
+
+<div class="p"><!----></div>
+<b>Finally...</b><br />
+
+<div class="p"><!----></div>
+Execute <em>M-x ensime</em> from Emacs. Follow the instructions in the minibuffer to select your project. If you encounter any problems, see section <a href="#sec:troubleshooting">5</a> for troubleshooting.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc3">
+3</a>&nbsp;&nbsp;Creating a Project</h2>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc3.1">
+3.1</a>&nbsp;&nbsp;Generating a Config File</h3>
+<a name="sec:config">
+</a>
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEc3.1.1">
+3.1.1</a>&nbsp;&nbsp;Using sbt to Generate a Config File</h4>
+
+<div class="p"><!----></div>
+First, you need to install the ENSIME sbt plugin. Add the following lines to your project/plugins.sbt:
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+addSbtPlugin("org.ensime"&nbsp;%&nbsp;"ensime-sbt-cmd"&nbsp;%&nbsp;"VERSION")
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+Replace VERSION with the latest version of the plugin, available at https://github.com/aemoncannon/ensime-sbt-cmd. Then, from an sbt shell, generate your ENSIME project:
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+ensime&nbsp;generate
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+You should now have a .ensime file in the root of your project. Instead of editing this file directly, if you need to adjust ENSIME configuration settings, you can change the value of the sbt setting <em>ensime-config</em>. The value should be a lisp S-Expression, just like the .ensime configuration format. The ENSIME sbt plugin includes some helpers for building S-Expressions. For example, your Build.scala might include the following:
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+import&nbsp;org.ensime.sbt.Plugin.Settings.ensimeConfig
+import&nbsp;org.ensime.sbt.util.SExp._
+
+ensimeConfig&nbsp;:=&nbsp;sexp(
+&nbsp;&nbsp;key(":compiler-args"),&nbsp;sexp("-Ywarn-dead-code",&nbsp;"-Ywarn-shadowing"),
+&nbsp;&nbsp;key(":formatting-prefs"),&nbsp;sexp(
+&nbsp;&nbsp;&nbsp;&nbsp;key(":alignParameters"),&nbsp;true
+&nbsp;&nbsp;)
+)
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+If you have multiple sbt subprojects, they may each specify different ensime-config values.
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEc3.1.2">
+3.1.2</a>&nbsp;&nbsp;Generating Configs for Other Project Types</h4>
+
+<div class="p"><!----></div>
+ENSIME includes a wizard for automatically generating configuration files. In Emacs, execute <em>M-x ensime-config-gen</em>. Then simply follow the directions in the mini-buffer to create a .ensime file for your project.  ENSIME will try to guess the type(mvn, custom, etc) of your project, based on the files and directory structure. If the config generator does a poor job for your project, please let us know so we can improve it. And of course you can still create the .ensime file for your project manually. See the section on the .ensime format below.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc3.2">
+3.2</a>&nbsp;&nbsp;Notes on Specific Project Types</h3>
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEc3.2.1">
+3.2.1</a>&nbsp;&nbsp;SBT</h4>
+
+<div class="p"><!----></div>
+<b>Inferior SBT</b>:<br />
+The keystrokes <em>C-c C-v s</em> will launch (or switch to an existing) inferior sbt session.<br />
+
+<div class="p"><!----></div>
+<b>Compile-on-Save</b>:<br />
+If the value of the Emacs-Lisp variablt ensime-sbt-compile-on-save is non-nil ENSIME will invoke the 'compile' task in the inferior sbt process(presuming you have one running) whenever you save a Scala buffer. This option is enabled by default.<br />
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEc3.2.2">
+3.2.2</a>&nbsp;&nbsp;Other</h4>
+See section <a href="#sec:configformat">3.3</a> for how to specify dependency, source, and class-output locations.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc3.3">
+3.3</a>&nbsp;&nbsp;Config File Format</h3>
+<a name="sec:configformat">
+</a>
+
+<div class="p"><!----></div>
+Each project <em>must</em> have a .ensime file. The .ensime file contains the configuration for your project, and must be located in your project's root directory.The contents of the file must be a valid Emacs-Lisp S-Expression. Here's a quick primer on ELisp values.
+
+<div class="p"><!----></div>
+<br /><br />
+<table border="1">
+<tr><td align="left"><b>"..."</b> </td><td align="left">A String  </td></tr>
+<tr><td align="left"><b>t</b> </td><td align="left">True </td></tr>
+<tr><td align="left"><b>nil</b> </td><td align="left">False, null, or opposite of t.  </td></tr>
+<tr><td align="left"><b>(...)</b> </td><td align="left">A literal list. </td></tr>
+<tr><td align="left"><b>:abcd123</b> </td><td align="left">A keyword </td></tr>
+<tr><td align="left"><b>(:key1 val1 :key2 val2)</b> </td><td align="left">An indexed property-list. </td></tr></table>
+
+
+<div class="p"><!----></div>
+<br /><br />What follows is a description of all available configuration options. Required options are marked as 'Required'. Any filename or directory paths may be relative to the project root.
+
+<div class="p"><!----></div>
+<br /><b>:root-dir</b>
+<br />
+
+<blockquote>
+The root directory of your project. This option should be filled in by your editor.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;a&nbsp;filename
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:name</b>
+<br />
+
+<blockquote>
+The short identifier for your project. Should be the same that you use
+  when publishing. Will be displayed in the Emacs mode-line when
+  connected to an ENSIME server.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;name
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:package</b>
+<br />
+
+<blockquote>
+An optional 'primary' package for your project. Used by ENSIME to populate
+  the project outline view.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;package&nbsp;name
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:module-name</b>
+<br />
+
+<blockquote>
+The canonical module-name of this project.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;name
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:active-subproject</b>
+<br />
+
+<blockquote>
+The module-name of the subproject which is currently selected.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;module&nbsp;name
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:name</b>
+<br />
+
+<blockquote>
+A list of module-names on which this project depends.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;module&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:version</b>
+<br />
+
+<blockquote>
+The current, working version of your project.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;version&nbsp;number
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:compile-deps</b>
+<br />
+
+<blockquote>
+A list of jar files and class directories to include on the compilation
+  classpath. No recursive expansion will be done.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;file&nbsp;and&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:compile-jars</b>
+<br />
+
+<blockquote>
+A list of jar files and directories to search for jar files to include
+  on the compilation classpath. Directories will be searched recursively.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;file&nbsp;and&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:runtime-deps</b>
+<br />
+
+<blockquote>
+A list of jar files and class directories to include on the runtime
+  classpath. No recursive expansion will be done.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;file&nbsp;and&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:runtime-jars</b>
+<br />
+
+<blockquote>
+A list of jar files and directories to search for jar files to include
+  on the runtime classpath. Directories will be searched recursively.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;file&nbsp;and&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:test-deps</b>
+<br />
+
+<blockquote>
+A list of jar files and class directories to include on the test
+  classpath. No recursive expansion will be done.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;file&nbsp;and&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:source-roots</b>
+<br />
+
+<blockquote>
+A list of directories in which to start searching for source files.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:target</b>
+<br />
+
+<blockquote>
+The root of the class output directory.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;directory
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:disable-index-on-startup</b>
+<br />
+
+<blockquote>
+Disable the classpath indexing process that happens at startup.
+  This will speed up the loading process significantly, at the
+  cost of breaking some functionality.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Boolean:&nbsp;t&nbsp;or&nbsp;nil
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:only-include-in-index</b>
+<br />
+
+<blockquote>
+Only classes that match one of the given regular expressions will be
+  added to the index. If this is omitted, all classes will be added.
+  This can be used to reduce memory usage and speed up loading.
+  For example:
+  
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>:only-include-in-index&nbsp;("my\\.project\\.packages\\.\*"&nbsp;"important\\.dependency\\..\*")
+</pre>
+  </b></dd>
+</dl>
+  This option can be used in conjunction with 'exclude-from-index' -
+  the result when both are given is that the exclusion expressions are
+  applied to the names that pass the inclusion filter.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;regular&nbsp;expresions
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:exclude-from-index</b>
+<br />
+
+<blockquote>
+Classes that match one of the given regular expressions will not be
+  added to the index. This can be used to reduce memory usage and
+  speed up loading.
+  For example:
+  
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>:exclude-from-index&nbsp;("com\\.sun\\..\*"&nbsp;"com\\.apple\\..\*")
+</pre>
+ </b></dd>
+</dl>
+  This option can be used in conjunction with 'only-include-in-index' -
+  the result when both are given is that the exclusion expressions are
+  applied to the names that pass the inclusion filter.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;regular&nbsp;expresions
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:compiler-args</b>
+<br />
+
+<blockquote>
+Specify arguments that should be passed to ENSIME's internal
+  presentation compiler. Warning: the presentation compiler
+  understands a subset of the batch compiler's arguments.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;arguments
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:builder-args</b>
+<br />
+
+<blockquote>
+Specify arguments that should be passed to ENSIME's internal
+  incrmental compiler.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;arguments
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:formatting-prefs</b>
+<br />
+
+<blockquote>
+Customize the behavior of the source formatter. All Scalariform
+  preferences are supported:
+<br /><br />
+
+<table border="1">
+<tr><td align="left"><b>:alignParameters</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:alignSingleLineCaseStatements</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:alignSingleLineCaseStatements_maxArrowIndent</b> </td><td align="left">1-100  </td></tr>
+<tr><td align="left"><b>:compactStringConcatenation</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:doubleIndentClassDeclaration</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:indentLocalDefs</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:indentPackageBlocks</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:indentSpaces</b> </td><td align="left">1-10  </td></tr>
+<tr><td align="left"><b>:indentWithTabs</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:multilineScaladocCommentsStartOnFirstLine</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:preserveDanglingCloseParenthesis</b> </td><td align="left">t or nil </td></tr>
+<tr><td align="left"><b>:preserveSpaceBeforeArguments</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:rewriteArrowSymbols</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:spaceBeforeColon</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:spaceInsideBrackets</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:spaceInsideParentheses</b> </td><td align="left">t or nil  </td></tr>
+<tr><td align="left"><b>:spacesWithinPatternBinders</b> </td><td align="left">t or nil  </td></tr></table>
+<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;keyword,&nbsp;string&nbsp;pairs:&nbsp;preferences
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />  
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc4">
+4</a>&nbsp;&nbsp;Usage</h2>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.1">
+4.1</a>&nbsp;&nbsp;Startup</h3>
+To start ensime type <em>M-x ensime</em>. You only need to do this once per project session. Follow the minibuffer instructions to specify the location of your .ensime project file. Bear in mind that the server may take several seconds to finish loading and analyzing your project's sources. To watch the progress of the ENSIME startup, switch to the <em>*inferior-ensime-server*</em> buffer.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.2">
+4.2</a>&nbsp;&nbsp;Symbol and Member Completion</h3>
+ENSIME completion is initiated by pressing the <em>TAB</em> key. To complete a symbol, type the first couple characters, then press <em>TAB</em>. Currently this works for local variables, method parameters, unqualified method names, and type names. To complete a type member, type '.' or <em>SPACE</em> followed by <em>TAB</em>.<br />
+
+<div class="p"><!----></div>
+<b>Completion menu key commands</b>:<br />
+Candidates can be scrolled with <em>M-n</em> and <em>M-p</em> or <em>UP</em> and <em>DOWN</em>. Candidates can be searched by typing <em>C-s</em>. Press <em>TAB</em> again to complete a common prefix. To cancel completion, type <em>C-g</em>. Finally, if you've selected the completion you want, press <em>ENTER</em>. If the selected completion was a method name, the minibuffer will display help for the method parameters.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.3">
+4.3</a>&nbsp;&nbsp;Type/Package Inspector</h3>
+
+<div class="p"><!----></div>
+<b>Invocation</b>:<br />
+Control+Right-Clicking on a symbol in a Scala buffer, or typing <em>C-c C-v i</em> while the point is over a symbol will launch the type inspector. Typing <em>C-c C-v o</em> will open the inspector on the current project's main package. <em>C-c C-v p</em> will inspect the package of the current source file. Use the command <em>M-x ensime-inspect-by-path</em> to inspect an arbitrary type or package.<br />
+
+<div class="p"><!----></div>
+<b>Package Inspector</b>:<br />
+Displays a hierarchical view of a package, including all top-level types. Select a type to open the Type Inspector.<br />
+
+<div class="p"><!----></div>
+<b>Type Inspector</b>:<br />
+Lists the interfaces that contribute members to the inspected type. List each interface's methods, with full type signatures. If the type has a companion object/class, a link to the companion will appear under the heading.<br />
+
+<div class="p"><!----></div>
+<b>Navigation</b>:<br />
+Most things in the inspector are hyper-linked. You can click these links with the mouse or position your cursor over them and press ENTER. A history is kept of all the pages you view in the inspector. Go back in this history by typing '<em>,</em>' and forward by typing '<em>.</em>'.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.4">
+4.4</a>&nbsp;&nbsp;The Scala REPL</h3>
+
+<div class="p"><!----></div>
+First, ensure that you've set the :target directive in your config file. The REPL will load your project classes from the :target directory. Then, type <em>C-c C-v z</em> to launch the embedded Scala REPL. The REPL should be launched with all your project classes loaded and available. Please note that the Scala 2.8 REPL tab-completion does not currently work under ENSIME.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.5">
+4.5</a>&nbsp;&nbsp;Incremental Building</h3>
+
+<div class="p"><!----></div>
+Incremental building allows for fast turn-around in the running/testing of your application. The building/rebuilding support in ENSIME is intended for those who are not already using the sbt build system, as sbt users will probably wish to continue using the sbt shell's support for incremental building (it may still be worth a try though, as the build-manager included in ENSIME uses a finer grained check for modifications).
+
+<div class="p"><!----></div>
+First, ensure that you've set the :target directive in your config file. The :target directory is where the classes will be written by the incremental builder. Then, type <em>C-c C-b b</em> to start building your project. When the build is finished, a window will appear listing the result of the build. After subsequent source changes, you may type <em>C-c C-b r</em> to rebuild only those parts of the project that depend on things you've changed. 
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.6">
+4.6</a>&nbsp;&nbsp;Debugging</h3>
+
+<div class="p"><!----></div>
+Debugging support in ENSIME is provided by running an instance of jdb under Emacs, sending it commands, and parsing its output. As such, in addition to the graphical tools provided by ENSIME, you also have full access to the jdb command line.<br />
+
+<div class="p"><!----></div>
+<b>Launching the Debugger</b>:<br />
+First, ensure that you've set the :target directive in your config file. The debugger needs these classes to run your application. Then, type <em>C-c C-d d</em> to launch the embedded Scala Debugger. <br />
+
+<div class="p"><!----></div>
+<b>Break Points</b>:<br />
+With your cursor on a line of Scala source, type <em>C-c C-d b</em> to set a breakpoint. Type <em>C-c C-d u</em> to remove the breakpoint.<br />
+
+<div class="p"><!----></div>
+<b>Run Control</b>:<br />
+Once you've set your breakpoints, type <em>C-c C-d r</em> to run the program. Type <em>C-c C-d c</em> to continue after hitting a breakpoint, or <em>C-c C-d s</em> to step into the current line, or <em>C-c C-d n</em> to step to the next line.<br />
+
+<div class="p"><!----></div>
+<b>Value Inspection</b>:<br />
+When stopped at a breakpoint, switch to the debug buffer <em>*ensime-db*</em>. Type 'locals' ENTER to see a list of all the local variables in the current runtime context. Use 'dump X" to dump the fields of an object X. Or 'print X' to print the value of an arbitrary expression X. To get help on more jdb commands, type 'help'.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.7">
+4.7</a>&nbsp;&nbsp;Refactoring</h3>
+
+<div class="p"><!----></div>
+<b>Rename</b>:<br />
+Place your cursor over the symbol you'd like to rename. Type <em>M-x ensime-refactor-rename</em> and follow the minibuffer instructions.<br />
+
+<div class="p"><!----></div>
+<b>Organize Imports</b>:<br />
+Type <em>M-x ensime-refactor-organize-imports</em> in a Scala source buffer. Follow the minibuffer instructions.<br />
+
+<div class="p"><!----></div>
+<b>Extract Method</b>:<br />
+Select a region by setting the mark using <em>C-SPACE</em> and then placing the point at the end of the region. All selected code will be extracted into a helper method. Type <em>M-x ensime-refactor-extract-method</em> and follow the minibuffer instructions.<br />
+
+<div class="p"><!----></div>
+<b>Inline Local</b>:<br />
+Place your cursor over the local val whose value you'd like to inline. Type <em>M-x ensime-refactor-inline-local</em> and follow the minibuffer instructions.<br />
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.8">
+4.8</a>&nbsp;&nbsp;Global Type and Method Search</h3>
+
+<div class="p"><!----></div>
+Type <em>C-c C-v v</em> to start a global search. Type space separated keywords to filter the results of the search. For example, if I wanted to find java.util.Vector, I might start by typing 'vector', which would list all symbols containing the word 'vector'(case-insensitive), and then I would type 'java' to further refine the search. <em>C-p</em> and <em>C-n</em> move the selection up and down, respectively, and <em>ENTER</em> will jump to the source or definition of the selected symbol.
+
+<div class="p"><!----></div>
+Note that typing a keyword with a capital letter will automatically enable case-sensitivity.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.9">
+4.9</a>&nbsp;&nbsp;Source Formatting</h3>
+
+<div class="p"><!----></div>
+ENSIME uses the Scalariform library to format Scala sources. Type <em>C-c C-v f</em> to format the current buffer. See section <a href="#sec:configformat">3.3</a> for instructions on how to customize the formatting preferences.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.10">
+4.10</a>&nbsp;&nbsp;Semantic Highlighting</h3>
+
+<div class="p"><!----></div>
+Normally syntax highlighting is based on the <em>syntactic</em> aspects of the source code. Semantic Highlighting adds color-coding based on semantic properties of the source. For example: a syntax highlighter can't tell whether a given identifier is a var or a val or a method call. Semantic Highlighting on the other hand can color vars differently to warn of their mutability. 
+
+<div class="p"><!----></div>
+Semantic Highlighting is <em>disabled</em> by default. People use a wide variety of color schemes in Emacs; it would have been difficult to arrive at coloring scheme that worked well for everyone. 
+
+<div class="p"><!----></div>
+Enabling Semantic Highlighting is as simple as changing the value of the variable ensime-sem-high-faces, which stores a list of (symbolType . face) associations. A `face' can be a reference to an existing Emacs face, such as font-lock-keyword-face, or a list of the form (:foreground `color'), where `color' is either a standard Emacs color (such as `slate gray') or a hex value like `#ff0000'. For example, you might add the following to your .emacs file:
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(setq&nbsp;ensime-sem-high-faces
+&nbsp;&nbsp;'(
+&nbsp;&nbsp;&nbsp;(var&nbsp;.&nbsp;(:foreground&nbsp;"#ff2222"))
+&nbsp;&nbsp;&nbsp;(val&nbsp;.&nbsp;(:foreground&nbsp;"#dddddd"))
+&nbsp;&nbsp;&nbsp;(varField&nbsp;.&nbsp;(:foreground&nbsp;"#ff3333"))
+&nbsp;&nbsp;&nbsp;(valField&nbsp;.&nbsp;(:foreground&nbsp;"#dddddd"))
+&nbsp;&nbsp;&nbsp;(functionCall&nbsp;.&nbsp;(:foreground&nbsp;"#84BEE3"))
+&nbsp;&nbsp;&nbsp;(param&nbsp;.&nbsp;(:foreground&nbsp;"#ffffff"))
+&nbsp;&nbsp;&nbsp;(class&nbsp;.&nbsp;font-lock-type-face)
+&nbsp;&nbsp;&nbsp;(trait&nbsp;.&nbsp;(:foreground&nbsp;"#084EA8"))
+&nbsp;&nbsp;&nbsp;(object&nbsp;.&nbsp;(:foreground&nbsp;"#026DF7"))
+&nbsp;&nbsp;&nbsp;(package&nbsp;.&nbsp;font-lock-preprocessor-face)
+&nbsp;&nbsp;&nbsp;))
+
+</pre>
+</b></dd>
+</dl>
+Once the value of ensime-sem-high-faces has changed, the next time you save a file, the designated symbol types will be highlighted.
+By the way, the symbol types in the example above are all that are currently supported. 
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.11">
+4.11</a>&nbsp;&nbsp;Scaladoc and Javadoc Browsing (customizing)</h3>
+
+<div class="p"><!----></div>
+If ENSIME cannot find the source for a type or member, it will instead try to browse to the www documentation. Support is included for the java and scala standard libraries, as well as the android class library. To add your own doc library, you need to add a handler to the <em>ensime-doc-lookup-map</em>. This handler list is made up of (regex . handler) pairs, where regex is a regular expression string that will be matched against the fully qualified type name, and handler is a function that will be applied to the requested type and member and should return a url. Here's an example of how you might add new java docs for classes in com.example:
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+
+(defun&nbsp;make-example-doc-url&nbsp;(type&nbsp;&amp;optional&nbsp;member)
+&nbsp;&nbsp;(ensime-make-java-doc-url-helper&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;"http://developer.example.com/apidocs/"&nbsp;type&nbsp;member))
+
+(add-to-list&nbsp;'ensime-doc-lookup-map&nbsp;'("^com\\.example\\."&nbsp;.&nbsp;make-example-doc-url))
+
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+Note that <em>ensime-make-java-doc-url-helper</em>, and its Scala equivalent <em>ensime-make-scala-doc-url-helper</em>, are provided for doing the harder work of building the url paths.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc4.12">
+4.12</a>&nbsp;&nbsp;Command Reference</h3>
+
+<div class="p"><!----></div>
+<br /><b>TAB</b><br />
+Start completing a method/variable.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v i  or  Control+Right-Click</b><br />
+Inspect the type of the expression under the cursor.
+<br />
+
+<div class="p"><!----></div>
+<b>M-.  or  Control+Left-Click</b><br />
+Jump to definition of symbol under cursor.
+<br />
+
+<div class="p"><!----></div>
+<b>M-,</b><br />
+Pop back to previously visited position.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v .</b><br />
+Select the surrounding syntactic context. Subsequent taps of '.' and ',' will grow and shrink the selection, respectively.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v v</b><br />
+Search globally for methods or types.
+<br />
+
+<div class="p"><!----></div>
+<b>Control+Right-Click(on an imported package)</b><br />
+Inspect the package under cursor.
+<br />
+
+<div class="p"><!----></div>
+<b>Mouse Hover</b><br />
+Echo the type of the expression under the cursor.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v p</b><br />
+Inspect the package of the current source file.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v o</b><br />
+Inspect the package specified in .ensime as :package.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v r</b><br />
+List all references to the symbol under the cursor.
+<br />
+
+<div class="p"><!----></div>
+<b>.</b><br />
+Forward one page in the inspector history.
+<br />
+
+<div class="p"><!----></div>
+<b>,</b><br />
+Backward one page in the inspector history.
+<br />
+
+<div class="p"><!----></div>
+<b>C-n or TAB</b><br />
+Forward one link in the inspector.
+<br />
+
+<div class="p"><!----></div>
+<b>C-p</b><br />
+Backward one link in the inspector.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v s</b><br />
+Switch to the sbt command-line (works for sbt projects only)
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v z</b><br />
+Switch to the scala interpreter, with project classes in the classpath.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v c</b><br />
+Typecheck the current file.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v a</b><br />
+Typecheck all files in the project.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v e</b><br />
+Show all errors and warnings in the project.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v f</b><br />
+Format the current Scala source file.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-v u</b><br />
+Undo a refactoring or formatting change.
+<br />
+
+<div class="p"><!----></div>
+<b>M-n</b><br />
+Go to the next compilation note in the current buffer.
+<br />
+
+<div class="p"><!----></div>
+<b>M-p</b><br />
+Go to the previous compilation note in the current buffer.
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-d <em>x</em></b><br />
+Where <em>x</em> is one of:
+
+<ul>
+<li> <b>d</b>  Start the debugger.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>b</b>  Set a breakpoint.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>u</b>  Clear a breakpoint.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>r</b>  Run the debugged class.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>s</b>  Step.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>n</b>  Step over.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>c</b>  Continue from a breakpoint.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>q</b>  Kill the debug session.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>l</b>  List the local variables at current line.
+<div class="p"><!----></div>
+</li>
+</ul>
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-r <em>x</em></b><br />
+Where <em>x</em> is one of:
+
+<ul>
+<li> <b>r</b>  Rename the symbol at point.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>o</b>  Organize imports.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>l</b>  Extract local.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>m</b>  Extract method.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>i</b>  Inline local.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>t</b>  Add import for type at point.
+<div class="p"><!----></div>
+</li>
+</ul>
+<br />
+
+<div class="p"><!----></div>
+<b>C-c C-b <em>x</em></b><br />
+Where <em>x</em> is one of:
+
+<ul>
+<li> <b>b</b>  Build the entire project.
+<div class="p"><!----></div>
+</li>
+
+<li> <b>r</b>  Rebuild the project, incrementally.
+<div class="p"><!----></div>
+</li>
+</ul>
+<br />
+
+<div class="p"><!----></div>
+<b>M-x ensime-reload</b><br />
+Reload the .ensime file and recompile the project. Useful if you hit a server bug.
+<br />
+
+<div class="p"><!----></div>
+<b>M-x ensime-config-get</b><br />
+Start the automatic configuration file generator.
+<br />
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEc5">
+5</a>&nbsp;&nbsp;Troubleshooting</h2>
+<a name="sec:troubleshooting">
+</a>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc5.1">
+5.1</a>&nbsp;&nbsp;Diagnosing Issues</h3>
+You may want to examine the contents of the <em>*inferior-ensime-server*</em> buffer. This buffer collects the stdout and stderr of the server process, which is useful for debugging. If the compiler is in a broken state, you can restart it with M-x ensime-reload. Otherwise, if things are irreparably b0rked, you can always kill the <em>*inferior-ensime-server*</em> buffer (which kills the server process) and restart ensime with M-x ensime. 
+
+<div class="p"><!----></div>
+If you've hit a recurring bug, please post an issue to github.com/aemoncannon/ensime. Please include your OS, Emacs version, ENSIME version, and the contents of <em>*inferior-ensime-server*</em>.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc5.2">
+5.2</a>&nbsp;&nbsp;Emacs Binary Search Path</h3>
+When launching the embedded sbt shell, or the Scala repl, ENSIME uses the Emacs start-process command. Rather than using the value of the PATH environment variable, this command searches for binaries using the paths stored at the Emacs variable exec-path. On some Windows and OSX machines, exec-path will not by default contain the value of PATH. See 
+<pre>http://xahlee.org/emacs/emacs_env_var_paths.html
+</pre> for more details. For example, the following Emacs Lisp could be used to manually add a Scala binary directory to the exec-path:
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(setq&nbsp;exec-path&nbsp;(append&nbsp;exec-path&nbsp;(list&nbsp;"/home/aemon/scala/bin"&nbsp;)))
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEc5.3">
+5.3</a>&nbsp;&nbsp;Custom JVM Options</h3>
+If you're having problems with the default arguments (max heap, initial heap) that ENSIME uses in its startup script, you can modify the environment variable ENSIME_JVM_ARGS to override the arguments that are passed to the ENSIME Server JVM.
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEcA">
+A</a>&nbsp;&nbsp;Installation from Git Clone</h2>
+
+<div class="p"><!----></div>
+Note: This section is for people who want to hack on ENSIME itself.<br />
+
+<div class="p"><!----></div>
+After cloning, run 'sbt update'. Then run 'sbt stage' to create the deployment directories underneath the root clone directory. Then follow the install instructions in section <a href="#sec:install">2.2</a> above, substituting CLONE_DIR/dist as the root of your ENSIME distribution.<br />
+
+<div class="p"><!----></div>
+A common work-flow when hacking ENSIME:
+
+<ul>
+<li> Edit source files
+<div class="p"><!----></div>
+</li>
+
+<li> 'sbt stage'
+<div class="p"><!----></div>
+</li>
+
+<li> Stop ENSIME server by killing <em>*inferior-ensime-server*</em> buffer
+<div class="p"><!----></div>
+</li>
+
+<li> Restart ENSIME with M-x ensime
+<div class="p"><!----></div>
+</li>
+</ul>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEcB">
+B</a>&nbsp;&nbsp;Running the End-to-End ENSIME Tests</h2>
+
+<div class="p"><!----></div>
+
+<ul>
+<li> 'sbt stage'
+<div class="p"><!----></div>
+</li>
+
+<li> 'cd etc'
+<div class="p"><!----></div>
+</li>
+
+<li> 'bash run_emacs_tests.sh'
+<div class="p"><!----></div>
+</li>
+
+<li> Please be patient. These tests take a few mins to run. If all goes well you should see a buffer with a long list of 'ok's.
+<div class="p"><!----></div>
+</li>
+</ul>
+
+<div class="p"><!----></div>
+ <h2><a name="tth_sEcC">
+C</a>&nbsp;&nbsp;Using the ENSIME Server with Other Editors</h2>
+
+<div class="p"><!----></div>
+The ENSIME server is intentionally editor agnostic. It is our hope that it may be used to provide semantic information to Scala modes in other text editors. In order to interact with the ENSIME server, your editor's extension mechanism should ideally be able to open a persistent socket connection and respond to asynchronous events on that socket. Otherwise it may be difficult to interact with some of the long-running calls.
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEcC.1">
+C.1</a>&nbsp;&nbsp;Starting the Server</h3>
+
+<div class="p"><!----></div>
+Emacs starts the ENSIME server using the server.sh script in the <em>bin</em> folder of the ENSIME distribution. Rather than tell the server explicitely what tcp port it should bind to,we instead pass the filename of a temporary file to the script. The first thing the server does on startup is choose a random, open port, and write the number to the given file. Emacs then reads this file and connects to the server. 
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEcC.2">
+C.2</a>&nbsp;&nbsp;The Swank Protocol</h3>
+The Emacs ENSIME client communicates with the server using the Swank protocol. This protocol was originally developed for the SLIME lisp environment for Emacs. A socket connection is maintained for the duration of the session. The client and server exchange s-expressions. At the wire level, these messages are encoded as sequences of ASCII bytes. Each message is prepended with a fixed-size header denoting its length.
+
+<div class="p"><!----></div>
+To send an s-expression, determine its ASCII length and then encode that integer as a padded six-digit hexadecimal value.  Write this value to the output socket first, then followed by the ASCII form of the s-expression.  On the receiving side, the reader loop should read six ASCII characters into a buffer and convert that into an integer, then read that number of ASCII characters from the socket, parsing the result into an s-expression.<br />
+
+<div class="p"><!----></div>
+<br /> <img src="wire_protocol.png" alt="wire_protocol.png" /> <br />
+
+<div class="p"><!----></div>
+<br /> See the E-Lisp function <em>ensime-net-send</em> in ensime.el for details on how messages are sent from Emacs, and the function <em>ensime-net-encode-length</em> for the implementation of the header encoding. See the functions readMessage and writeMessage in org.ensime.protocol.SwankProtocol to see how the messaging is handled in Scala. 
+
+<div class="p"><!----></div>
+At the application level, the s-expressions encode RPC calls, RPC responses, and events. RPC calls are used to make requests of the server. Events are generally used for the server to communicate un-prompted, asynchronous activity to the client - such as an error or warning generated during compilation. What follows is a commented excerpt from the initialization of an ENSIME session. These s-expressions were copied from the <em>*ensime-events*</em> buffer in Emacs which logs all protocol events (useful for learning the application protocol!). Server messages are indented. Comments prefixed with #.
+
+<div class="p"><!----></div>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+
+#&nbsp;The&nbsp;client&nbsp;requests&nbsp;information&nbsp;about&nbsp;the&nbsp;server
+(:swank-rpc
+&nbsp;(swank:connection-info)&nbsp;1)
+
+#&nbsp;Server&nbsp;responds.&nbsp;Note&nbsp;the&nbsp;numbering&nbsp;scheme&nbsp;for&nbsp;RPC&nbsp;calls:&nbsp;call&nbsp;&amp;&nbsp;response&nbsp;
+#&nbsp;have&nbsp;the&nbsp;same&nbsp;call&nbsp;id&nbsp;(1&nbsp;in&nbsp;this&nbsp;case).
+(:return
+&nbsp;(:ok
+&nbsp;&nbsp;(:pid&nbsp;nil&nbsp;:server-implementation
+	(:name&nbsp;"ENSIMEserver")
+	:machine&nbsp;nil&nbsp;:features&nbsp;nil&nbsp;:version&nbsp;"0.0.1"))&nbsp;1)
+
+#&nbsp;The&nbsp;client&nbsp;initializes&nbsp;the&nbsp;session&nbsp;by&nbsp;sending&nbsp;the&nbsp;configuration.&nbsp;
+#&nbsp;This&nbsp;is&nbsp;read&nbsp;from&nbsp;the&nbsp;.ensime&nbsp;file.
+(:swank-rpc
+&nbsp;(swank:init-project
+&nbsp;&nbsp;(:package&nbsp;"org.ensime"&nbsp;:root-dir&nbsp;"/home/aemon/src/misc/ensime/"))&nbsp;2)
+
+#&nbsp;The&nbsp;acknowledges&nbsp;the&nbsp;message&nbsp;and&nbsp;sends&nbsp;some&nbsp;useful&nbsp;project&nbsp;info&nbsp;
+#&nbsp;back&nbsp;to&nbsp;the&nbsp;client.
+(:return
+&nbsp;(:ok
+&nbsp;&nbsp;(:name&nbsp;"ensime"&nbsp;:source-roots
+		&nbsp;("/home/aemon/src/misc/ensime/src/main/scala"&nbsp;
+		&nbsp;"/home/aemon/src/misc/ensime/src/main/java"&nbsp;
+		&nbsp;"/home/aemon/src/misc/ensime/src/test/scala")))&nbsp;2)
+
+
+#&nbsp;Server&nbsp;asks&nbsp;client&nbsp;to&nbsp;display&nbsp;a&nbsp;user&nbsp;message.&nbsp;
+#&nbsp;Note:&nbsp;this&nbsp;is&nbsp;not&nbsp;part&nbsp;of&nbsp;any&nbsp;RPC&nbsp;call&nbsp;-&nbsp;it's&nbsp;just&nbsp;an&nbsp;event&nbsp;from&nbsp;the&nbsp;server.
+(:background-message&nbsp;"Initializing&nbsp;Analyzer.&nbsp;Please&nbsp;wait...")
+
+#&nbsp;Server&nbsp;alerts&nbsp;client&nbsp;that&nbsp;the&nbsp;analyzer&nbsp;is&nbsp;now&nbsp;ready&nbsp;for&nbsp;RPC&nbsp;requests.
+(:compiler-ready&nbsp;t)
+
+#&nbsp;Server&nbsp;tells&nbsp;client&nbsp;the&nbsp;result&nbsp;of&nbsp;the&nbsp;last&nbsp;full&nbsp;compilation&nbsp;
+#&nbsp;(nil&nbsp;means&nbsp;0&nbsp;notes&nbsp;(errors&nbsp;or&nbsp;warnings))
+(:typecheck-result
+&nbsp;(:lang&nbsp;:scala&nbsp;:is-full&nbsp;t&nbsp;:notes&nbsp;nil))
+
+
+</pre>
+</b></dd>
+</dl>
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEcC.3">
+C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.7.4</h3>
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEcC.3.1">
+C.3.1</a>&nbsp;&nbsp;Protocol Change Log</h4>
+
+<div class="p"><!----></div>
+
+<pre>
+0.7.4
+&nbsp;&nbsp;Add&nbsp;optional&nbsp;'owner-type-id'&nbsp;key&nbsp;to&nbsp;SymbolInfo
+&nbsp;&nbsp;Add&nbsp;optional&nbsp;'case-sens'&nbsp;option&nbsp;to&nbsp;swank:completions&nbsp;call
+0.7.3
+&nbsp;&nbsp;Add&nbsp;optional&nbsp;'to-insert'&nbsp;key&nbsp;to&nbsp;CompletionInfo
+&nbsp;&nbsp;Add&nbsp;optional&nbsp;a&nbsp;max&nbsp;results&nbsp;argument&nbsp;to&nbsp;swank:completions&nbsp;call
+0.7.2
+&nbsp;&nbsp;Get&nbsp;rid&nbsp;of&nbsp;scope&nbsp;and&nbsp;type&nbsp;completion&nbsp;in&nbsp;favor&nbsp;of&nbsp;unified
+&nbsp;&nbsp;swank:completions&nbsp;call.
+&nbsp;&nbsp;Wrap&nbsp;completion&nbsp;result&nbsp;in&nbsp;CompletionInfoList.
+0.7.1
+&nbsp;&nbsp;Remove&nbsp;superfluous&nbsp;status&nbsp;values&nbsp;for&nbsp;events&nbsp;such&nbsp;as&nbsp;:compiler-ready,
+&nbsp;&nbsp;:clear-scala-notes,&nbsp;etc.
+0.7
+&nbsp;&nbsp;Rename&nbsp;swank:perform-refactor&nbsp;to&nbsp;swank:prepare-refactor.
+&nbsp;&nbsp;Include&nbsp;status&nbsp;flag&nbsp;in&nbsp;return&nbsp;of&nbsp;swank:exec-refactor.
+
+</pre>
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEcC.3.2">
+C.3.2</a>&nbsp;&nbsp;Important Datastructures</h4>
+
+<div class="p"><!----></div>
+Certain datastructures, such as the <em>position</em> structure used to describe a source position, are re-used in many RPC calls. Implementors may wish to factor these structures out as classes or utility functions.
+
+<div class="p"><!----></div>
+<b>Position</b>
+<br />
+
+<blockquote>
+A source position.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+&nbsp;&nbsp;:file&nbsp;&nbsp;&nbsp;//String:A&nbsp;filename
+&nbsp;&nbsp;:offset&nbsp;&nbsp;//Int:The&nbsp;zero-indexed&nbsp;character&nbsp;offset&nbsp;of&nbsp;this&nbsp;position.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>RangePosition</b>
+<br />
+
+<blockquote>
+A source position that describes a range of characters in a file.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+&nbsp;&nbsp;:file&nbsp;&nbsp;&nbsp;//String:A&nbsp;filename
+&nbsp;&nbsp;:start&nbsp;&nbsp;//Int:The&nbsp;character&nbsp;offset&nbsp;of&nbsp;the&nbsp;start&nbsp;of&nbsp;the&nbsp;range.
+&nbsp;&nbsp;:end&nbsp;&nbsp;&nbsp;&nbsp;//Int:The&nbsp;character&nbsp;offset&nbsp;of&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;range.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>Change</b>
+<br />
+
+<blockquote>
+Describes a change to a source code file.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:file&nbsp;//String:Filename&nbsp;of&nbsp;source&nbsp;&nbsp;to&nbsp;be&nbsp;changed
+:text&nbsp;//String:Text&nbsp;to&nbsp;be&nbsp;inserted
+:from&nbsp;//Int:Character&nbsp;offset&nbsp;of&nbsp;start&nbsp;of&nbsp;text&nbsp;to&nbsp;replace.
+:to&nbsp;//Int:Character&nbsp;offset&nbsp;of&nbsp;end&nbsp;of&nbsp;text&nbsp;to&nbsp;replace.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>SymbolSearchResult</b>
+<br />
+
+<blockquote>
+Describes a symbol found in a search operation.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:Qualified&nbsp;name&nbsp;of&nbsp;symbol.
+:local-name&nbsp;//String:Unqualified&nbsp;name&nbsp;of&nbsp;symbol
+:decl-as&nbsp;//Symbol:What&nbsp;kind&nbsp;of&nbsp;symbol&nbsp;this&nbsp;is.
+:pos&nbsp;//Position:Where&nbsp;is&nbsp;this&nbsp;symbol&nbsp;declared?
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>ParamSectionInfo</b>
+<br />
+
+<blockquote>
+Description of one of a method's parameter sections.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:params&nbsp;//List&nbsp;of&nbsp;(String&nbsp;TypeInfo)&nbsp;pairs:Describes&nbsp;params&nbsp;in&nbsp;section
+:is-implicit&nbsp;//Bool:Is&nbsp;this&nbsp;an&nbsp;implicit&nbsp;parameter&nbsp;section.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>CallCompletionInfo</b>
+<br />
+
+<blockquote>
+Description of a Scala method's type
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:result-type&nbsp;//TypeInfo
+:param-sections&nbsp;//List&nbsp;of&nbsp;ParamSectionInfo:
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>TypeMemberInfo</b>
+<br />
+
+<blockquote>
+Description of a type member
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:The&nbsp;name&nbsp;of&nbsp;this&nbsp;member.
+:type-sig&nbsp;//String:The&nbsp;type&nbsp;signature&nbsp;of&nbsp;this&nbsp;member
+:type-id&nbsp;//Int:The&nbsp;type&nbsp;id&nbsp;for&nbsp;this&nbsp;member's&nbsp;type.
+:is-callable&nbsp;//Bool:Is&nbsp;this&nbsp;a&nbsp;function&nbsp;or&nbsp;method&nbsp;type.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>TypeInfo</b>
+<br />
+
+<blockquote>
+Description of a Scala type.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:The&nbsp;short&nbsp;name&nbsp;of&nbsp;this&nbsp;type.
+:type-id&nbsp;//Int:Type&nbsp;Id&nbsp;of&nbsp;this&nbsp;type&nbsp;(for&nbsp;fast&nbsp;lookups)
+:full-name&nbsp;//String:The&nbsp;qualified&nbsp;name&nbsp;of&nbsp;this&nbsp;type
+:decl-as&nbsp;//Symbol:What&nbsp;kind&nbsp;of&nbsp;type&nbsp;is&nbsp;this?&nbsp;(class,trait,object,&nbsp;etc)
+:type-args&nbsp;//List&nbsp;of&nbsp;TypeInfo:Type&nbsp;args&nbsp;this&nbsp;type&nbsp;has&nbsp;been&nbsp;applied&nbsp;to.
+:members&nbsp;//List&nbsp;of&nbsp;TypeMemberInfo
+:arrow-type&nbsp;//Bool:Is&nbsp;this&nbsp;a&nbsp;function&nbsp;or&nbsp;method&nbsp;type?
+:result-type&nbsp;//TypeInfo:
+:param-sections&nbsp;//List&nbsp;of&nbsp;ParamSectionInfo:
+:pos&nbsp;//Position:Position&nbsp;where&nbsp;this&nbsp;type&nbsp;was&nbsp;declared
+:outer-type-id&nbsp;//Int:If&nbsp;this&nbsp;is&nbsp;a&nbsp;nested&nbsp;type,&nbsp;type&nbsp;id&nbsp;of&nbsp;owning&nbsp;type
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>InterfaceInfo</b>
+<br />
+
+<blockquote>
+Describes an inteface that a type supports
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:type&nbsp;//TypeInfo:The&nbsp;type&nbsp;of&nbsp;the&nbsp;interface.
+:via-view&nbsp;//Bool:Is&nbsp;this&nbsp;type&nbsp;suppoted&nbsp;via&nbsp;an&nbsp;implicit&nbsp;conversion?
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>TypeInspectInfo</b>
+<br />
+
+<blockquote>
+Detailed description of a Scala type.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:type&nbsp;//TypeInfo
+:companion-id&nbsp;//Int:Type&nbsp;Id&nbsp;of&nbsp;this&nbsp;type's&nbsp;companion&nbsp;type.
+:interfaces&nbsp;//List&nbsp;of&nbsp;InterfaceInfo:Interfaces&nbsp;this&nbsp;type&nbsp;supports
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>SymbolInfo</b>
+<br />
+
+<blockquote>
+Description of a Scala symbol.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:Name&nbsp;of&nbsp;this&nbsp;symbol.
+:type&nbsp;//TypeInfo:The&nbsp;type&nbsp;of&nbsp;this&nbsp;symbol.
+:decl-pos&nbsp;//Position:Source&nbsp;location&nbsp;of&nbsp;this&nbsp;symbol's&nbsp;declaration.
+:is-callable&nbsp;//Bool:Is&nbsp;this&nbsp;symbol&nbsp;a&nbsp;method&nbsp;or&nbsp;function?
+:owner-type-id&nbsp;//Int:&nbsp;(optional)&nbsp;Type&nbsp;id&nbsp;of&nbsp;owner&nbsp;type.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>CompletionInfo</b>
+<br />
+
+<blockquote>
+An abbreviated symbol description.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:Name&nbsp;of&nbsp;this&nbsp;symbol.
+:type-sig&nbsp;//String:The&nbsp;type&nbsp;signature&nbsp;of&nbsp;this&nbsp;symbol.
+:type-id&nbsp;//Int:A&nbsp;type&nbsp;id.
+:is-callable&nbsp;//Bool:Is&nbsp;this&nbsp;symbol&nbsp;a&nbsp;method&nbsp;or&nbsp;function?
+:to-insert&nbsp;//String|Nil:The&nbsp;representation&nbsp;that&nbsp;should&nbsp;be
+&nbsp;&nbsp;written&nbsp;to&nbsp;the&nbsp;buffer.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>CompletionInfoList</b>
+<br />
+
+<blockquote>
+An annotated collection of CompletionInfo structures.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:prefix&nbsp;//String:The&nbsp;common&nbsp;prefix&nbsp;for&nbsp;all&nbsp;selections,
+&nbsp;&nbsp;modulo&nbsp;case.
+:completions&nbsp;//List&nbsp;of&nbsp;CompletionInfo:In&nbsp;order&nbsp;of&nbsp;descending
+&nbsp;&nbsp;relevance.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>PackageInfo</b>
+<br />
+
+<blockquote>
+A description of a package and all its members.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:Name&nbsp;of&nbsp;this&nbsp;package.
+:full-name&nbsp;//String:Qualified&nbsp;name&nbsp;of&nbsp;this&nbsp;package.
+:members&nbsp;//List&nbsp;of&nbsp;PackageInfo&nbsp;|&nbsp;TypeInfo:The&nbsp;members&nbsp;of&nbsp;this&nbsp;package.
+:info-type&nbsp;//Symbol:Literally&nbsp;'package
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>SymbolDesignations</b>
+<br />
+
+<blockquote>
+Describe the symbol classes in a given textual range.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:file&nbsp;//String:Filename&nbsp;of&nbsp;file&nbsp;to&nbsp;be&nbsp;annotated.
+:syms&nbsp;//List&nbsp;of&nbsp;(Symbol&nbsp;Integer&nbsp;Integer):Denoting&nbsp;the&nbsp;symbol&nbsp;class&nbsp;and&nbsp;start&nbsp;and&nbsp;end&nbsp;of&nbsp;the&nbsp;range&nbsp;where&nbsp;it&nbsp;applies.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>PackageMemberInfoLight</b>
+<br />
+
+<blockquote>
+An abbreviated package member description.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:name&nbsp;//String:Name&nbsp;of&nbsp;this&nbsp;symbol.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>RefactorFailure</b>
+<br />
+
+<blockquote>
+Notification that a refactoring has failed in some way.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:procedure-id&nbsp;//Int:The&nbsp;id&nbsp;for&nbsp;this&nbsp;refactoring.
+:message&nbsp;//String:A&nbsp;text&nbsp;description&nbsp;of&nbsp;the&nbsp;error.
+:status&nbsp;//Symbol:'failure.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>RefactorEffect</b>
+<br />
+
+<blockquote>
+A description of the effects a proposed refactoring would have.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:procedure-id&nbsp;//Int:The&nbsp;id&nbsp;for&nbsp;this&nbsp;refactoring.
+:refactor-type&nbsp;//Symbol:The&nbsp;type&nbsp;of&nbsp;refactoring.
+:status&nbsp;//Symbol:'success
+:changes&nbsp;//List&nbsp;of&nbsp;Change:The&nbsp;textual&nbsp;effects.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>RefactorResult</b>
+<br />
+
+<blockquote>
+A description of the effects a refactoring has effected.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:procedure-id&nbsp;//Int:The&nbsp;id&nbsp;for&nbsp;this&nbsp;refactoring.
+:refactor-type&nbsp;//Symbol:The&nbsp;type&nbsp;of&nbsp;refactoring.
+:touched&nbsp;//List&nbsp;of&nbsp;String:Names&nbsp;of&nbsp;files&nbsp;touched&nbsp;by&nbsp;the&nbsp;refactoring.
+:status&nbsp;//Symbol:'success.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>Note</b>
+<br />
+
+<blockquote>
+Describes a note generated by the compiler.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:severity&nbsp;//Symbol:&nbsp;One&nbsp;of&nbsp;'error,&nbsp;'warn,&nbsp;'info.
+:msg&nbsp;//String:&nbsp;Text&nbsp;of&nbsp;the&nbsp;compiler&nbsp;message.
+:beg&nbsp;//Int:&nbsp;Zero-based&nbsp;offset&nbsp;of&nbsp;beginning&nbsp;of&nbsp;region
+:end&nbsp;//Int:&nbsp;Zero-based&nbsp;offset&nbsp;of&nbsp;end&nbsp;of&nbsp;region
+:line&nbsp;//Int:&nbsp;Line&nbsp;number&nbsp;of&nbsp;region
+:col&nbsp;//Int:&nbsp;Column&nbsp;offset&nbsp;of&nbsp;region
+:file&nbsp;//String:&nbsp;Filename&nbsp;of&nbsp;source&nbsp;file
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>Notes</b>
+<br />
+
+<blockquote>
+Describes a set of notes generated by the compiler.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:is-full&nbsp;//Bool:&nbsp;Is&nbsp;the&nbsp;note&nbsp;the&nbsp;result&nbsp;of&nbsp;a&nbsp;full&nbsp;compilation?
+:notes&nbsp;//List&nbsp;of&nbsp;Note:&nbsp;The&nbsp;descriptions&nbsp;of&nbsp;the&nbsp;notes&nbsp;themselves.
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />  
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEcC.3.3">
+C.3.3</a>&nbsp;&nbsp;RPC Calls</h4>
+
+<div class="p"><!----></div>
+The ENSIME server understands all of the following RPC calls:
+
+<div class="p"><!----></div>
+<b>swank:connection-info</b>
+<br />
+
+<blockquote>
+Request connection information.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:pid&nbsp;&nbsp;//Int:The&nbsp;integer&nbsp;process&nbsp;id&nbsp;of&nbsp;the&nbsp;server&nbsp;(or&nbsp;nil&nbsp;if&nbsp;unnavailable)
+:implementation
+&nbsp;&nbsp;(
+&nbsp;&nbsp;:name&nbsp;&nbsp;//String:An&nbsp;identifying&nbsp;name&nbsp;for&nbsp;this&nbsp;server&nbsp;implementation.
+&nbsp;&nbsp;)
+:version&nbsp;//String:The&nbsp;version&nbsp;of&nbsp;the&nbsp;protocol&nbsp;this&nbsp;server&nbsp;supports.
+)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:connection-info)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:pid&nbsp;nil&nbsp;:implementation&nbsp;(:name&nbsp;"ENSIME&nbsp;-&nbsp;Reference&nbsp;Server")
+:version&nbsp;"0.7"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:init-project</b>
+<br />
+
+<blockquote>
+Initialize the server with a project configuration. The
+server returns it's own knowledge about the project, including
+source roots which can be used by clients to determine whether
+a given source file belongs to this project.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;complete&nbsp;ENSIME&nbsp;configuration&nbsp;property&nbsp;list.&nbsp;See&nbsp;manual.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:project-name&nbsp;//String:The&nbsp;name&nbsp;of&nbsp;the&nbsp;project.
+:source-roots&nbsp;//List&nbsp;of&nbsp;Strings:The&nbsp;source&nbsp;code&nbsp;directory&nbsp;roots..
+)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:init-project&nbsp;(:use-sbt&nbsp;t&nbsp;:compiler-args
+(-Ywarn-dead-code&nbsp;-Ywarn-catches&nbsp;-Xstrict-warnings)
+:root-dir&nbsp;/Users/aemon/projects/ensime/))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:project-name&nbsp;"ensime"&nbsp;:source-roots
+("/Users/aemon/projects/ensime/src/main/scala"
+"/Users/aemon/projects/ensime/src/test/scala"
+"/Users/aemon/projects/ensime/src/main/java")))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:peek-undo</b>
+<br />
+
+<blockquote>
+The intention of this call is to preview the effect of an undo
+before executing it.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:id&nbsp;//Int:Id&nbsp;of&nbsp;this&nbsp;undo
+:changes&nbsp;//List&nbsp;of&nbsp;Changes:Describes&nbsp;changes&nbsp;this&nbsp;undo&nbsp;would&nbsp;effect.
+:summary&nbsp;//String:Summary&nbsp;of&nbsp;action&nbsp;this&nbsp;undo&nbsp;would&nbsp;revert.
+)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:peek-undo)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:id&nbsp;1&nbsp;:changes&nbsp;((:file
+"/ensime/src/main/scala/org/ensime/server/RPCTarget.scala"
+:text&nbsp;"rpcInitProject"&nbsp;:from&nbsp;2280&nbsp;:to&nbsp;2284))
+:summary&nbsp;"Refactoring&nbsp;of&nbsp;type:&nbsp;'rename")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:exec-undo</b>
+<br />
+
+<blockquote>
+Execute a specific, server-side undo operation.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+An&nbsp;integer&nbsp;undo&nbsp;id.&nbsp;See&nbsp;swank:peek-undo&nbsp;for&nbsp;how&nbsp;to&nbsp;learn&nbsp;this&nbsp;id.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:id&nbsp;//Int:Id&nbsp;of&nbsp;this&nbsp;undo
+:touched-files&nbsp;//List&nbsp;of&nbsp;Strings:Filenames&nbsp;of&nbsp;touched&nbsp;files,
+)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:exec-undo&nbsp;1)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:id&nbsp;1&nbsp;:touched-files
+("/src/main/scala/org/ensime/server/RPCTarget.scala")))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:repl-config</b>
+<br />
+
+<blockquote>
+Get information necessary to launch a scala repl for this project.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+:classpath&nbsp;//String:Classpath&nbsp;string&nbsp;formatted&nbsp;for&nbsp;passing&nbsp;to&nbsp;Scala.
+)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:repl-config)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:classpath&nbsp;"lib1.jar:lib2.jar:lib3.jar"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:builder-init</b>
+<br />
+
+<blockquote>
+Initialize the incremental builder and kick off a full rebuild.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:builder-init)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;())&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:builder-update-files</b>
+<br />
+
+<blockquote>
+Signal to the incremental builder that the given files
+have changed and must be rebuilt. Triggers rebuild.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:Filenames,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project&nbsp;root.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:builder-update-files
+("/ensime/src/main/scala/org/ensime/server/Analyzer.scala"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;())&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:builder-add-files</b>
+<br />
+
+<blockquote>
+Signal to the incremental builder that the given files
+should be added to the build. Triggers rebuild.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:Filenames,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project&nbsp;root.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:builder-add-files
+("/ensime/src/main/scala/org/ensime/server/Analyzer.scala"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;())&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:builder-remove-files</b>
+<br />
+
+<blockquote>
+Signal to the incremental builder that the given files
+should be removed from the build. Triggers rebuild.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:Filenames,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project&nbsp;root.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:builder-remove-files
+("/ensime/src/main/scala/org/ensime/server/Analyzer.scala"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;())&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:remove-file</b>
+<br />
+
+<blockquote>
+Remove a file from consideration by the ENSIME analyzer.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;filename,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:remove-file&nbsp;"Analyzer.scala")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:typecheck-file</b>
+<br />
+
+<blockquote>
+Request immediate load and check the given source file.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;filename,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:typecheck-file&nbsp;"Analyzer.scala")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:typecheck-all</b>
+<br />
+
+<blockquote>
+Request immediate load and typecheck of all known sources.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:typecheck-all)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:format-source</b>
+<br />
+
+<blockquote>
+Run the source formatter the given source files. Writes
+the formatted sources to the disk. Note: the client is
+responsible for reloading the files from disk to display
+to user.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;String:Filenames,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:format-source&nbsp;("/ensime/src/Test.scala"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:public-symbol-search</b>
+<br />
+
+<blockquote>
+Search top-level symbols (types and methods) for names that
+contain ALL the given search keywords.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:Keywords&nbsp;that&nbsp;will&nbsp;be&nbsp;ANDed&nbsp;to&nbsp;form&nbsp;the&nbsp;query.
+Int:Maximum&nbsp;number&nbsp;of&nbsp;results&nbsp;to&nbsp;return.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;SymbolSearchResults
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:public-symbol-search&nbsp;("java"&nbsp;"io"&nbsp;"File")&nbsp;50)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;((:name&nbsp;"java.io.File"&nbsp;:local-name&nbsp;"File"&nbsp;:decl-as&nbsp;class
+:pos&nbsp;(:file&nbsp;"/Classes/classes.jar"&nbsp;:offset&nbsp;-1)))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:import-suggestions</b>
+<br />
+
+<blockquote>
+Search top-level types for qualified names similar to the given
+type names. This call can service requests for many typenames at
+once, but this isn't currently used in ENSIME.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:Source&nbsp;filename,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+Int:Character&nbsp;offset&nbsp;within&nbsp;that&nbsp;file&nbsp;where&nbsp;type&nbsp;name&nbsp;is&nbsp;referenced.
+List&nbsp;of&nbsp;String:Type&nbsp;names&nbsp;(possibly&nbsp;partial)&nbsp;for&nbsp;which&nbsp;to&nbsp;suggest.
+Int:The&nbsp;maximum&nbsp;number&nbsp;of&nbsp;results&nbsp;to&nbsp;return.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Lists&nbsp;of&nbsp;SymbolSearchResults:Each&nbsp;list&nbsp;corresponds&nbsp;to&nbsp;one&nbsp;of&nbsp;the
+&nbsp;&nbsp;type&nbsp;name&nbsp;arguments.
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:import-suggestions
+"/ensime/src/main/scala/org/ensime/server/Analyzer.scala"
+2300&nbsp;(Actor)&nbsp;10)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(((:name&nbsp;"scala.actors.Actor"&nbsp;:local-name&nbsp;"Actor"
+:decl-as&nbsp;trait&nbsp;:pos&nbsp;(:file&nbsp;"/lib/scala-library.jar"&nbsp;:offset&nbsp;-1)))))
+42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:completions</b>
+<br />
+
+<blockquote>
+Find viable completions at given point.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:Source&nbsp;filename,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+Int:Character&nbsp;offset&nbsp;within&nbsp;that&nbsp;file.
+Int:Max&nbsp;number&nbsp;of&nbsp;completions&nbsp;to&nbsp;return.&nbsp;Value&nbsp;of&nbsp;zero&nbsp;denotes
+&nbsp;&nbsp;no&nbsp;limit.
+Bool:If&nbsp;non-nil,&nbsp;only&nbsp;return&nbsp;prefixes&nbsp;that&nbsp;match&nbsp;the&nbsp;case&nbsp;of&nbsp;the
+&nbsp;&nbsp;prefix.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+CompletionInfoList:&nbsp;The&nbsp;list&nbsp;of&nbsp;completions
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:completions
+"/ensime/src/main/scala/org/ensime/protocol/SwankProtocol.scala
+22626&nbsp;0)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:prefix&nbsp;"form"&nbsp;:completions
+((:name&nbsp;"form"&nbsp;:type-sig&nbsp;"SExp"&nbsp;:type-id&nbsp;10)
+(:name&nbsp;"format"&nbsp;:type-sig&nbsp;"(String,&nbsp;&lt;repeated&#62;[Any])&nbsp;=&#62;&nbsp;String"
+:type-id&nbsp;11&nbsp;:is-callable&nbsp;t)))&nbsp;42))
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:package-member-completion</b>
+<br />
+
+<blockquote>
+Find possible completions for a given package path.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;package&nbsp;path:&nbsp;such&nbsp;as&nbsp;"org.ensime"&nbsp;or&nbsp;"com".
+String:The&nbsp;prefix&nbsp;of&nbsp;the&nbsp;package&nbsp;member&nbsp;name&nbsp;we&nbsp;are&nbsp;looking&nbsp;for.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;PackageMemberInfoLight:&nbsp;List&nbsp;of&nbsp;possible&nbsp;completions.
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:package-member-completion&nbsp;org.ensime.server&nbsp;Server)
+42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;((:name&nbsp;"Server$")&nbsp;(:name&nbsp;"Server")))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:call-completion</b>
+<br />
+
+<blockquote>
+Lookup the type information of a specific method or function
+type. This is used by ENSIME to retrieve detailed parameter
+and return type information after the user has selected a
+method or function completion.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:A&nbsp;type&nbsp;id,&nbsp;as&nbsp;returned&nbsp;by&nbsp;swank:scope-completion&nbsp;or
+&nbsp;&nbsp;swank:type-completion.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;CallCompletionInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:call-completion&nbsp;1))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:result-type&nbsp;(:name&nbsp;"Unit"&nbsp;:type-id&nbsp;7&nbsp;:full-name
+"scala.Unit"&nbsp;:decl-as&nbsp;class)&nbsp;:param-sections&nbsp;((:params&nbsp;(("id"
+(:name&nbsp;"Int"&nbsp;:type-id&nbsp;74&nbsp;:full-name&nbsp;"scala.Int"&nbsp;:decl-as&nbsp;class))
+("callId"&nbsp;(:name&nbsp;"Int"&nbsp;:type-id&nbsp;74&nbsp;:full-name&nbsp;"scala.Int"
+:decl-as&nbsp;class)))))))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:uses-of-symbol-at-point</b>
+<br />
+
+<blockquote>
+Request all source locations where indicated symbol is used in
+this project.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;Scala&nbsp;source&nbsp;filename,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+Int:Character&nbsp;offset&nbsp;of&nbsp;the&nbsp;desired&nbsp;symbol&nbsp;within&nbsp;that&nbsp;file.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;RangePosition:Locations&nbsp;where&nbsp;the&nbsp;symbol&nbsp;is&nbsp;reference.
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:uses-of-symbol-at-point&nbsp;"Test.scala"&nbsp;11334)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;((:file&nbsp;"RichPresentationCompiler.scala"&nbsp;:offset&nbsp;11442
+:start&nbsp;11428&nbsp;:end&nbsp;11849)&nbsp;(:file&nbsp;"RichPresentationCompiler.scala"
+:offset&nbsp;11319&nbsp;:start&nbsp;11319&nbsp;:end&nbsp;11339)))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:type-by-id</b>
+<br />
+
+<blockquote>
+Request description of the type with given type id.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:A&nbsp;type&nbsp;id.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;TypeIfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:type-by-id&nbsp;1381)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:name&nbsp;"Option"&nbsp;:type-id&nbsp;1381&nbsp;:full-name&nbsp;"scala.Option"
+:decl-as&nbsp;class&nbsp;:type-args&nbsp;((:name&nbsp;"Int"&nbsp;:type-id&nbsp;1129&nbsp;:full-name&nbsp;"scala.Int"
+:decl-as&nbsp;class))))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:type-by-name</b>
+<br />
+
+<blockquote>
+Lookup a type description by name.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;fully&nbsp;qualified&nbsp;name&nbsp;of&nbsp;a&nbsp;type.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;TypeIfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:type-by-name&nbsp;"java.lang.String")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:name&nbsp;"String"&nbsp;:type-id&nbsp;1188&nbsp;:full-name
+"java.lang.String"&nbsp;:decl-as&nbsp;class))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:type-by-name-at-point</b>
+<br />
+
+<blockquote>
+Lookup a type by name, in a specific source context.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;local&nbsp;or&nbsp;qualified&nbsp;name&nbsp;of&nbsp;the&nbsp;type.
+String:A&nbsp;source&nbsp;filename.
+Int:A&nbsp;character&nbsp;offset&nbsp;in&nbsp;the&nbsp;file.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;TypeInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:type-by-name-at-point&nbsp;"String"
+"SwankProtocol.scala"&nbsp;31680)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:name&nbsp;"String"&nbsp;:type-id&nbsp;1188&nbsp;:full-name
+"java.lang.String"&nbsp;:decl-as&nbsp;class))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:type-at-point</b>
+<br />
+
+<blockquote>
+Lookup type of thing at given position.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;source&nbsp;filename.
+Int:A&nbsp;character&nbsp;offset&nbsp;in&nbsp;the&nbsp;file.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;TypeInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:type-at-point&nbsp;"SwankProtocol.scala"
+&nbsp;32736)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:name&nbsp;"String"&nbsp;:type-id&nbsp;1188&nbsp;:full-name
+"java.lang.String"&nbsp;:decl-as&nbsp;class))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:inspect-type-at-point</b>
+<br />
+
+<blockquote>
+Lookup detailed type of thing at given position.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;source&nbsp;filename.
+Int:A&nbsp;character&nbsp;offset&nbsp;in&nbsp;the&nbsp;file.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;TypeInspectInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:inspect-type-at-point&nbsp;"SwankProtocol.scala"
+&nbsp;32736)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:type&nbsp;(:name&nbsp;"SExpList$"&nbsp;:type-id&nbsp;1469&nbsp;:full-name
+"org.ensime.util.SExpList$"&nbsp;:decl-as&nbsp;object&nbsp;:pos
+(:file&nbsp;"SExp.scala"&nbsp;:offset&nbsp;1877))......))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:inspect-type-by-id</b>
+<br />
+
+<blockquote>
+Lookup detailed type description by id<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:A&nbsp;type&nbsp;id.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;TypeInspectInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:inspect-type-by-id&nbsp;232)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:type&nbsp;(:name&nbsp;"SExpList$"&nbsp;:type-id&nbsp;1469&nbsp;:full-name
+"org.ensime.util.SExpList$"&nbsp;:decl-as&nbsp;object&nbsp;:pos
+(:file&nbsp;"SExp.scala"&nbsp;:offset&nbsp;1877))......))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:symbol-at-point</b>
+<br />
+
+<blockquote>
+Get a description of the symbol at given location.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;source&nbsp;filename.
+Int:A&nbsp;character&nbsp;offset&nbsp;in&nbsp;the&nbsp;file.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;SymbolInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:symbol-at-point&nbsp;"SwankProtocol.scala"&nbsp;36483)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:name&nbsp;"file"&nbsp;:type&nbsp;(:name&nbsp;"String"&nbsp;:type-id&nbsp;25
+:full-name&nbsp;"java.lang.String"&nbsp;:decl-as&nbsp;class)&nbsp;:decl-pos
+(:file&nbsp;"SwankProtocol.scala"&nbsp;:offset&nbsp;36404)))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:inspect-package-by-path</b>
+<br />
+
+<blockquote>
+Get a detailed description of the given package.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;qualified&nbsp;package&nbsp;name.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;PackageInfo
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:inspect-package-by-path&nbsp;"org.ensime.util"&nbsp;36483)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:name&nbsp;"util"&nbsp;:info-type&nbsp;package&nbsp;:full-name&nbsp;"org.ensime.util"
+:members&nbsp;((:name&nbsp;"BooleanAtom"&nbsp;:type-id&nbsp;278&nbsp;:full-name
+"org.ensime.util.BooleanAtom"&nbsp;:decl-as&nbsp;class&nbsp;:pos
+(:file&nbsp;"SExp.scala"&nbsp;:offset&nbsp;2848)).....)))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:prepare-refactor</b>
+<br />
+
+<blockquote>
+Initiate a refactoring. The server will respond with a summary
+of what the refactoring *would* do, were it executed.This call
+does not effect any changes unless the 4th argument is nil.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:A&nbsp;procedure&nbsp;id&nbsp;for&nbsp;this&nbsp;refactoring,&nbsp;uniquely&nbsp;generated&nbsp;by&nbsp;client.
+Symbol:The&nbsp;manner&nbsp;of&nbsp;refacoring&nbsp;we&nbsp;want&nbsp;to&nbsp;prepare.&nbsp;Currently,&nbsp;one&nbsp;of
+&nbsp;&nbsp;rename,&nbsp;extractMethod,&nbsp;extractLocal,&nbsp;organizeImports,&nbsp;or&nbsp;addImport.
+An&nbsp;association&nbsp;list&nbsp;of&nbsp;params&nbsp;of&nbsp;the&nbsp;form&nbsp;(sym1&nbsp;val1&nbsp;sym2&nbsp;val2).
+&nbsp;&nbsp;Contents&nbsp;of&nbsp;the&nbsp;params&nbsp;varies&nbsp;with&nbsp;the&nbsp;refactoring&nbsp;type:
+&nbsp;&nbsp;rename:&nbsp;(newName&nbsp;String&nbsp;file&nbsp;String&nbsp;start&nbsp;Int&nbsp;end&nbsp;Int)
+&nbsp;&nbsp;extractMethod:&nbsp;(methodName&nbsp;String&nbsp;file&nbsp;String&nbsp;start&nbsp;Int&nbsp;end&nbsp;Int)
+&nbsp;&nbsp;extractLocal:&nbsp;(name&nbsp;String&nbsp;file&nbsp;String&nbsp;start&nbsp;Int&nbsp;end&nbsp;Int)
+&nbsp;&nbsp;inlineLocal:&nbsp;(file&nbsp;String&nbsp;start&nbsp;Int&nbsp;end&nbsp;Int)
+&nbsp;&nbsp;organizeImports:&nbsp;(file&nbsp;String)
+&nbsp;&nbsp;addImport:&nbsp;(qualifiedName&nbsp;String&nbsp;file&nbsp;String&nbsp;start&nbsp;Int&nbsp;end&nbsp;Int)
+Bool:Should&nbsp;the&nbsp;refactoring&nbsp;require&nbsp;confirmation?&nbsp;If&nbsp;nil,&nbsp;the&nbsp;refactoring
+&nbsp;&nbsp;will&nbsp;be&nbsp;executed&nbsp;immediately.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+RefactorEffect&nbsp;|&nbsp;RefactorFailure
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:prepare-refactor&nbsp;6&nbsp;rename&nbsp;(file&nbsp;"SwankProtocol.scala"
+start&nbsp;39504&nbsp;end&nbsp;39508&nbsp;newName&nbsp;"dude")&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:procedure-id&nbsp;6&nbsp;:refactor-type&nbsp;rename&nbsp;:status&nbsp;success
+:changes&nbsp;((:file&nbsp;"SwankProtocol.scala"&nbsp;:text&nbsp;"dude"&nbsp;:from&nbsp;39504&nbsp;:to&nbsp;39508))
+))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:exec-refactor</b>
+<br />
+
+<blockquote>
+Execute a refactoring, usually after user confirmation.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:A&nbsp;procedure&nbsp;id&nbsp;for&nbsp;this&nbsp;refactoring,&nbsp;uniquely&nbsp;generated&nbsp;by&nbsp;client.
+Symbol:The&nbsp;manner&nbsp;of&nbsp;refacoring&nbsp;we&nbsp;want&nbsp;to&nbsp;prepare.&nbsp;Currently,&nbsp;one&nbsp;of
+&nbsp;&nbsp;rename,&nbsp;extractMethod,&nbsp;extractLocal,&nbsp;organizeImports,&nbsp;or&nbsp;addImport.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+RefactorResult&nbsp;|&nbsp;RefactorFailure
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:exec-refactor&nbsp;7&nbsp;rename)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:procedure-id&nbsp;7&nbsp;:refactor-type&nbsp;rename
+:touched-files&nbsp;("SwankProtocol.scala")))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:cancel-refactor</b>
+<br />
+
+<blockquote>
+Cancel a refactor that's been performed but not
+executed.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:Procedure&nbsp;Id&nbsp;of&nbsp;the&nbsp;refactoring.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:cancel-refactor&nbsp;1)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t))
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:symbol-designations</b>
+<br />
+
+<blockquote>
+Request the semantic classes of symbols in the given
+range. These classes are intended to be used for
+semantic highlighting.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;source&nbsp;filename.
+Int:The&nbsp;character&nbsp;offset&nbsp;of&nbsp;the&nbsp;start&nbsp;of&nbsp;the&nbsp;input&nbsp;range.
+Int:The&nbsp;character&nbsp;offset&nbsp;of&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;input&nbsp;range.
+List&nbsp;of&nbsp;Symbol:The&nbsp;symbol&nbsp;classes&nbsp;in&nbsp;which&nbsp;we&nbsp;are&nbsp;interested.
+&nbsp;&nbsp;Available&nbsp;classes&nbsp;are:&nbsp;var,val,varField,valField,functionCall,
+&nbsp;&nbsp;operator,param,class,trait,object.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+SymbolDesignations
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:symbol-designations&nbsp;"SwankProtocol.scala"&nbsp;0&nbsp;46857
+(var&nbsp;val&nbsp;varField&nbsp;valField))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:file&nbsp;"SwankProtocol.scala"&nbsp;:syms
+((varField&nbsp;33625&nbsp;33634)&nbsp;(val&nbsp;33657&nbsp;33661)&nbsp;(val&nbsp;33663&nbsp;33668)
+(varField&nbsp;34369&nbsp;34378)&nbsp;(val&nbsp;34398&nbsp;34400))))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:expand-selection</b>
+<br />
+
+<blockquote>
+Given a start and end point in a file, expand the
+selection so that it spans the smallest syntactic
+scope that contains start and end.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:A&nbsp;source&nbsp;filename.
+Int:The&nbsp;character&nbsp;offset&nbsp;of&nbsp;the&nbsp;start&nbsp;of&nbsp;the&nbsp;input&nbsp;range.
+Int:The&nbsp;character&nbsp;offset&nbsp;of&nbsp;the&nbsp;end&nbsp;of&nbsp;the&nbsp;input&nbsp;range.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;RangePosition:The&nbsp;expanded&nbsp;range.
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:expand-selection&nbsp;"Model.scala"&nbsp;4648&nbsp;4721)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:file&nbsp;"Model.scala"&nbsp;:start&nbsp;4374&nbsp;:end&nbsp;14085))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-active-vm</b>
+<br />
+
+<blockquote>
+Is a there an active vm? if so return a description.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Nil&nbsp;|&nbsp;A&nbsp;short&nbsp;description&nbsp;of&nbsp;the&nbsp;current&nbsp;vm.
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-active-vm)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;nil)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-start</b>
+<br />
+
+<blockquote>
+Start a new debug session.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;commandline&nbsp;to&nbsp;pass&nbsp;to&nbsp;the&nbsp;debugger.&nbsp;Of&nbsp;the&nbsp;form:
+&nbsp;&nbsp;"package.ClassName&nbsp;arg1&nbsp;arg2....."
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-start&nbsp;"org.hello.HelloWorld&nbsp;arg")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-stop</b>
+<br />
+
+<blockquote>
+Stop the debug session<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-stop)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-set-break</b>
+<br />
+
+<blockquote>
+Add a breakpoint<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;file&nbsp;in&nbsp;which&nbsp;to&nbsp;set&nbsp;the&nbsp;breakpoint.
+Int:The&nbsp;breakpoint&nbsp;line.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-set-break&nbsp;"hello.scala"&nbsp;12)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-clear-break</b>
+<br />
+
+<blockquote>
+Clear a breakpoint<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;file&nbsp;from&nbsp;which&nbsp;to&nbsp;clear&nbsp;the&nbsp;breakpoint.
+Int:The&nbsp;breakpoint&nbsp;line.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-clear&nbsp;"hello.scala"&nbsp;12)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-clear-all-breaks</b>
+<br />
+
+<blockquote>
+Clear all breakpoints<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-clear-all-breaks)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-list-breakpoints</b>
+<br />
+
+<blockquote>
+Get a list of all breakpoints set so far.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Position:A&nbsp;list&nbsp;of&nbsp;positions
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-list-breakpoints)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;((:file&nbsp;"hello.scala"&nbsp;:line&nbsp;1)
+(:file&nbsp;"hello.scala"&nbsp;:line&nbsp;23))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-run</b>
+<br />
+
+<blockquote>
+Resume execution of the VM.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-run)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-continue</b>
+<br />
+
+<blockquote>
+Resume execution of the VM.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;thread-id&nbsp;to&nbsp;continue.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-continue&nbsp;"1")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-step</b>
+<br />
+
+<blockquote>
+Step the given thread to the next line. Step into
+  function calls.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;thread-id&nbsp;to&nbsp;step.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-step&nbsp;"982398123")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-next</b>
+<br />
+
+<blockquote>
+Step the given thread to the next line. Do not
+  step into function calls.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;thread-id&nbsp;to&nbsp;step.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-next&nbsp;"982398123")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-step-out</b>
+<br />
+
+<blockquote>
+Step the given thread to the next line. Step out of
+  the current function to the calling frame if necessary.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;thread-id&nbsp;to&nbsp;step.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-step-out&nbsp;"982398123")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-value-for-name</b>
+<br />
+
+<blockquote>
+Get the local binding for the given name at this point
+  in the program's execution.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;The&nbsp;thread-id&nbsp;in&nbsp;which&nbsp;to&nbsp;search.
+String:&nbsp;The&nbsp;name&nbsp;to&nbsp;search&nbsp;for.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;DebugValue
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-value-for-name&nbsp;"thread-2"&nbsp;"apple")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;"23")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-value-for-id</b>
+<br />
+
+<blockquote>
+Get the current binding for the given object id.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;The&nbsp;object&nbsp;id&nbsp;to&nbsp;look&nbsp;up.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;DebugValue
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-value-for-id&nbsp;"obj-1")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;"23")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-value-for-field</b>
+<br />
+
+<blockquote>
+Get the value bound to the given name in the given object instance.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;object&nbsp;to&nbsp;search.
+String:&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;field&nbsp;to&nbsp;search&nbsp;for.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;DebugValue
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-value-for-field&nbsp;"obj-22"&nbsp;"name")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;"Horatio&nbsp;Hornblower")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-value-for-index</b>
+<br />
+
+<blockquote>
+Get the value at the given offset in the array specified by object id<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;object&nbsp;to&nbsp;search.
+Int:&nbsp;The&nbsp;index&nbsp;of&nbsp;the&nbsp;element&nbsp;to&nbsp;return
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;DebugValue
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-value-for-index&nbsp;"obj-22"&nbsp;0)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;"Captain&nbsp;Bracegirdle")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-backtrace</b>
+<br />
+
+<blockquote>
+Get a detailed backtrace for the given thread<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;thread.
+Int:&nbsp;The&nbsp;index&nbsp;of&nbsp;the&nbsp;first&nbsp;frame&nbsp;to&nbsp;list.&nbsp;The&nbsp;0th&nbsp;frame&nbsp;is&nbsp;the
+&nbsp;&nbsp;currently&nbsp;executing&nbsp;frame.
+Int:&nbsp;The&nbsp;number&nbsp;of&nbsp;frames&nbsp;to&nbsp;return.&nbsp;-1&nbsp;denotes&nbsp;_all_&nbsp;frames.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;DebugBacktrace
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-backtrace&nbsp;"23"&nbsp;0&nbsp;2)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;(:frames&nbsp;()&nbsp;:thread-id&nbsp;"23"&nbsp;:thread-name&nbsp;"main"))&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:shutdown-server</b>
+<br />
+
+<blockquote>
+Politely ask the server to shutdown.<br /><br />
+<b>Arguments:</b>
+ None<br /><br />
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:shutdown-server)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />  
+
+<div class="p"><!----></div>
+      <h4><a name="tth_sEcC.3.4">
+C.3.4</a>&nbsp;&nbsp;Events</h4>
+
+<div class="p"><!----></div>
+The ENSIME server will dispatch the following types of events:
+
+<div class="p"><!----></div>
+<b>:compiler-ready</b>
+<br />
+
+<blockquote>
+Signal that the compiler has finished its initial compilation and the server
+is ready to accept RPC calls.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:compiler-ready)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:full-typecheck-finished</b>
+<br />
+
+<blockquote>
+Signal that the compiler has finished compilation of the entire project.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:full-typecheck-finished)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:indexer-ready</b>
+<br />
+
+<blockquote>
+Signal that the indexer has finished indexing the classpath.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:indexer-ready)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:scala-notes</b>
+<br />
+
+<blockquote>
+Notify client when Scala compiler generates errors,warnings or other notes.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:scala-notes
+notes&nbsp;//List&nbsp;of&nbsp;Note
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:java-notes</b>
+<br />
+
+<blockquote>
+Notify client when Java compiler generates errors,warnings or other notes.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:java-notes
+notes&nbsp;//List&nbsp;of&nbsp;Note
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:clear-all-scala-notes</b>
+<br />
+
+<blockquote>
+Notify client when Scala notes have become invalidated. Editor should consider
+all Scala related notes to be stale at this point.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:clear-all-scala-notes)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:clear-all-java-notes</b>
+<br />
+
+<blockquote>
+Notify client when Java notes have become invalidated. Editor should consider
+all Java related notes to be stale at this point.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:clear-all-java-notes)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />  
+
+<div class="p"><!----></div>
+     <h3><a name="tth_sEcC.4">
+C.4</a>&nbsp;&nbsp;Other Protocols</h3>
+
+<div class="p"><!----></div>
+The ENSIME server is designed to support pluggable protocols. org.ensime.protocol.SwankProtocol is just one implementation of the org.ensime.protocol.Protocol interface. Adding a new protocol (JSON-based, or binary or Java marshalled objects...) should only require adding a new implementation of org.ensime.protocol.Protocol. Please contact the ENSIME maintainer if this is your plan, however, since we still need to add a command-line switch to control the protocol that ENSIME uses.
+
+<div class="p"><!----></div>
+</div>
+</center>
+</html>
