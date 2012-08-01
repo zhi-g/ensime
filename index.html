@@ -98,7 +98,7 @@
 
 <div class="p"><!----></div>
  
-<center><b>Last Updated</b>: 07/25/2012
+<center><b>Last Updated</b>: 07/31/2012
 </center>
 
 <div class="p"><!----></div>
@@ -174,7 +174,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.2"
 >C.2&nbsp; The Swank Protocol</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3"
->C.3&nbsp; ENSIME Swank RPC: Version 0.8.1</a><br />
+>C.3&nbsp; ENSIME Swank RPC: Version 0.8.2</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.1"
 >C.3.1&nbsp; Protocol Change Log</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.2"
@@ -705,6 +705,28 @@ String:&nbsp;directory
 Disable the classpath indexing process that happens at startup.
   This will speed up the loading process significantly, at the
   cost of breaking some functionality.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Boolean:&nbsp;t&nbsp;or&nbsp;nil
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:disable-source-load-on-startup</b>
+<br />
+
+<blockquote>
+Disable the parsing and reloading of all sources that normally
+  occurs on startup.<br /><br />
 <b>Arguments:</b>
 
 <dl compact="compact">
@@ -1477,7 +1499,7 @@ At the application level, the s-expressions encode RPC calls, RPC responses, and
 
 <div class="p"><!----></div>
      <h3><a name="tth_sEcC.3">
-C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.8.1</h3>
+C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.8.2</h3>
 
 <div class="p"><!----></div>
       <h4><a name="tth_sEcC.3.1">
@@ -1486,6 +1508,9 @@ C.3.1</a>&nbsp;&nbsp;Protocol Change Log</h4>
 <div class="p"><!----></div>
 
 <pre>
+0.8.2
+&nbsp;&nbsp;Debug&nbsp;attachement
+&nbsp;&nbsp;CompletionInfo&nbsp;type-sig&nbsp;now&nbsp;has&nbsp;structure
 0.8.1
 &nbsp;&nbsp;Add&nbsp;patch-source.
 &nbsp;&nbsp;Completions&nbsp;now&nbsp;takes&nbsp;a&nbsp;'reload'&nbsp;argument.
@@ -1803,6 +1828,30 @@ Description of a Scala symbol.
 <br />
 
 <div class="p"><!----></div>
+<b>CompletionSignature</b>
+<br />
+
+<blockquote>
+An abbreviated signature for a type member
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+//List&nbsp;of&nbsp;List&nbsp;of&nbsp;Pairs&nbsp;of&nbsp;String:&nbsp;Parameter&nbsp;sections
+//String:&nbsp;Result&nbsp;type
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
 <b>CompletionInfo</b>
 <br />
 
@@ -1817,7 +1866,7 @@ An abbreviated symbol description.
 <pre>
 (
 :name&nbsp;//String:Name&nbsp;of&nbsp;this&nbsp;symbol.
-:type-sig&nbsp;//String:The&nbsp;type&nbsp;signature&nbsp;of&nbsp;this&nbsp;symbol.
+:type-sig&nbsp;//A&nbsp;CompletionSignature
 :type-id&nbsp;//Int:A&nbsp;type&nbsp;id.
 :is-callable&nbsp;//Bool:Is&nbsp;this&nbsp;symbol&nbsp;a&nbsp;method&nbsp;or&nbsp;function?
 :to-insert&nbsp;//String|Nil:The&nbsp;representation&nbsp;that&nbsp;should&nbsp;be
@@ -4776,6 +4825,65 @@ A&nbsp;DebugValue
 
 <pre>
 (:return&nbsp;(:ok&nbsp;"Horatio&nbsp;Hornblower")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:debug-set-stack-var</b>
+<br />
+
+<blockquote>
+Set the value at the given offset in the given stack frame.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Int:&nbsp;The&nbsp;stack&nbsp;frame&nbsp;in&nbsp;which&nbsp;the&nbsp;local&nbsp;is&nbsp;found.
+Int:&nbsp;The&nbsp;offset&nbsp;within&nbsp;the&nbsp;stack&nbsp;frame.
+String:&nbsp;A&nbsp;string&nbsp;encoded&nbsp;value.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Boolean:&nbsp;t&nbsp;on&nbsp;success,&nbsp;nil&nbsp;otherwise
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:debug-set-stack-var&nbsp;0&nbsp;2&nbsp;"true")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
 
 </pre>
 </b></dd>
