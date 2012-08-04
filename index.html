@@ -98,7 +98,7 @@
 
 <div class="p"><!----></div>
  
-<center><b>Last Updated</b>: 07/31/2012
+<center><b>Last Updated</b>: 08/04/2012
 </center>
 
 <div class="p"><!----></div>
@@ -698,6 +698,27 @@ String:&nbsp;directory
 <br />
 
 <div class="p"><!----></div>
+<b>:target</b>
+<br />
+
+<blockquote>
+The root of the test class output directory.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;directory
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
 <b>:disable-index-on-startup</b>
 <br />
 
@@ -794,7 +815,7 @@ Classes that match one of the given regular expressions will not be
 
 <pre>:exclude-from-index&nbsp;("com\\.sun\\..\*"&nbsp;"com\\.apple\\..\*")
 </pre>
- </b></dd>
+  </b></dd>
 </dl>
   This option can be used in conjunction with 'only-include-in-index' -
   the result when both are given is that the exclusion expressions are
@@ -843,7 +864,7 @@ List&nbsp;of&nbsp;Strings:&nbsp;arguments
 
 <blockquote>
 Specify arguments that should be passed to ENSIME's internal
-  incrmental compiler.<br /><br />
+  incremental compiler.<br /><br />
 <b>Arguments:</b>
 
 <dl compact="compact">
@@ -860,14 +881,60 @@ List&nbsp;of&nbsp;Strings:&nbsp;arguments
 <br />
 
 <div class="p"><!----></div>
+<b>:java-compiler-args</b>
+<br />
+
+<blockquote>
+Specify arguments that should be passed to ENSIME's internal
+JDT java compiler. Arguments are passed as a list of strings,
+with each pair being a key, value drawn from
+org.eclipse.jdt.internal.compiler.impl.CompilerOptions<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;arguments
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:java-compiler-version</b>
+<br />
+
+<blockquote>
+Specify version of java compiler to use (must be supported by internal
+JDT).<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:&nbsp;version
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
 <b>:formatting-prefs</b>
 <br />
 
 <blockquote>
 Customize the behavior of the source formatter. All Scalariform
   preferences are supported:
-<br /><br />
-
+ <br /><br />
+ 
 <table border="1">
 <tr><td align="left"><b>:alignParameters</b> </td><td align="left">t or nil  </td></tr>
 <tr><td align="left"><b>:alignSingleLineCaseStatements</b> </td><td align="left">t or nil  </td></tr>
