@@ -98,7 +98,7 @@
 
 <div class="p"><!----></div>
  
-<center><b>Last Updated</b>: 08/04/2012
+<center><b>Last Updated</b>: 08/25/2012
 </center>
 
 <div class="p"><!----></div>
@@ -174,7 +174,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.2"
 >C.2&nbsp; The Swank Protocol</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3"
->C.3&nbsp; ENSIME Swank RPC: Version 0.8.2</a><br />
+>C.3&nbsp; ENSIME Swank RPC: Version 0.8.3</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.1"
 >C.3.1&nbsp; Protocol Change Log</a><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="#tth_sEcC.3.2"
@@ -677,6 +677,29 @@ List&nbsp;of&nbsp;Strings:&nbsp;directory&nbsp;names
 <br />
 
 <div class="p"><!----></div>
+<b>:reference-source-roots</b>
+<br />
+
+<blockquote>
+A list of directories in which to start searching for reference
+sources. Generally these are the sources that correspond to library
+dependencies.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;Strings:&nbsp;directory&nbsp;names
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
 <b>:target</b>
 <br />
 
@@ -748,6 +771,30 @@ Boolean:&nbsp;t&nbsp;or&nbsp;nil
 <blockquote>
 Disable the parsing and reloading of all sources that normally
   occurs on startup.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+Boolean:&nbsp;t&nbsp;or&nbsp;nil
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>:disable-scala-jars-on-classpath</b>
+<br />
+
+<blockquote>
+Disable putting standard Scala jars (i.e. scala-library.jar,
+  scala-reflect.jar and scala-compiler) on the classpath.
+  Useful for compiling against custom Scala builds and for
+  development of Scala compiler.<br /><br />
 <b>Arguments:</b>
 
 <dl compact="compact">
@@ -1566,7 +1613,7 @@ At the application level, the s-expressions encode RPC calls, RPC responses, and
 
 <div class="p"><!----></div>
      <h3><a name="tth_sEcC.3">
-C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.8.2</h3>
+C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.8.3</h3>
 
 <div class="p"><!----></div>
       <h4><a name="tth_sEcC.3.1">
@@ -1575,9 +1622,14 @@ C.3.1</a>&nbsp;&nbsp;Protocol Change Log</h4>
 <div class="p"><!----></div>
 
 <pre>
+0.8.3
+&nbsp;&nbsp;Add&nbsp;debug-to-string&nbsp;call.
+&nbsp;&nbsp;Refactor&nbsp;debug-value-for-name&nbsp;to&nbsp;debug-locate-name&nbsp;+&nbsp;debug-value
+&nbsp;&nbsp;Adds&nbsp;typecheck-files
+&nbsp;&nbsp;Unifies&nbsp;debug&nbsp;locations&nbsp;under&nbsp;DebugLocation
 0.8.2
-&nbsp;&nbsp;Debug&nbsp;attachement
-&nbsp;&nbsp;CompletionInfo&nbsp;type-sig&nbsp;now&nbsp;has&nbsp;structure
+&nbsp;&nbsp;Debug&nbsp;attachment&nbsp;to&nbsp;remote&nbsp;VM
+&nbsp;&nbsp;CompletionInfo&nbsp;type-sig&nbsp;now&nbsp;has&nbsp;structure&nbsp;see&nbsp;CompletionSignature
 0.8.1
 &nbsp;&nbsp;Add&nbsp;patch-source.
 &nbsp;&nbsp;Completions&nbsp;now&nbsp;takes&nbsp;a&nbsp;'reload'&nbsp;argument.
@@ -2199,6 +2251,46 @@ Describes a patch to be applied to a single file.
 </b></dd>
 </dl>
 </blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>DebugLocation</b>
+<br />
+
+<blockquote>
+A unique location in the VM under debug. Note: this datastructure
+is a union of several location types.
+<br />
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(
+&nbsp;&nbsp;:type&nbsp;&nbsp;&nbsp;//Symbol:One&nbsp;of&nbsp;'reference,&nbsp;'field,&nbsp;'element,&nbsp;'slot
+&nbsp;&nbsp;[&nbsp;//&nbsp;if&nbsp;type&nbsp;is&nbsp;'reference
+&nbsp;&nbsp;:object-id&nbsp;&nbsp;//String:The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;object.
+&nbsp;&nbsp;]
+&nbsp;&nbsp;[&nbsp;//&nbsp;if&nbsp;type&nbsp;is&nbsp;'field
+&nbsp;&nbsp;:object-id&nbsp;&nbsp;//String:The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;object.
+&nbsp;&nbsp;:field&nbsp;&nbsp;//String:Name&nbsp;of&nbsp;the&nbsp;field&nbsp;of&nbsp;the&nbsp;object.
+&nbsp;&nbsp;]
+&nbsp;&nbsp;[&nbsp;//&nbsp;if&nbsp;type&nbsp;is&nbsp;'element
+&nbsp;&nbsp;:object-id&nbsp;&nbsp;//String:The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;array.
+&nbsp;&nbsp;:index&nbsp;&nbsp;//Int:A&nbsp;zero-indexed&nbsp;offset&nbsp;within&nbsp;array.
+&nbsp;&nbsp;]
+&nbsp;&nbsp;[&nbsp;//&nbsp;if&nbsp;type&nbsp;is&nbsp;'slot
+&nbsp;&nbsp;:thread-id&nbsp;&nbsp;//String:The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;thread.
+&nbsp;&nbsp;:frame&nbsp;&nbsp;//Int:Select&nbsp;the&nbsp;zero-indexed&nbsp;frame&nbsp;in&nbsp;the&nbsp;thread's&nbsp;call&nbsp;stack.
+&nbsp;&nbsp;:offset&nbsp;&nbsp;//Int:A&nbsp;zero-indexed&nbsp;offset&nbsp;within&nbsp;frame.
+&nbsp;&nbsp;]
+)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
 <br />  
 
 <div class="p"><!----></div>
@@ -2755,6 +2847,53 @@ String:A&nbsp;filename,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbs
 
 <pre>
 (:swank-rpc&nbsp;(swank:typecheck-file&nbsp;"Analyzer.scala")&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
+<b>swank:typecheck-files</b>
+<br />
+
+<blockquote>
+Request immediate load and check the given source files.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+List&nbsp;of&nbsp;String:Filenames,&nbsp;absolute&nbsp;or&nbsp;relative&nbsp;to&nbsp;the&nbsp;project.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+ None<br /><br />
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:typecheck-files&nbsp;("Analyzer.scala"))&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4079,6 +4218,64 @@ A&nbsp;RangePosition:The&nbsp;expanded&nbsp;range.
 <br />
 
 <div class="p"><!----></div>
+<b>swank:method-bytecode</b>
+<br />
+
+<blockquote>
+Get bytecode for method at file and line.<br /><br />
+<b>Arguments:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+String:The&nbsp;file&nbsp;in&nbsp;which&nbsp;the&nbsp;method&nbsp;is&nbsp;defined.
+Int:A&nbsp;line&nbsp;within&nbsp;the&nbsp;method's&nbsp;code.
+
+</pre>
+</b></dd>
+</dl>
+<b>Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+A&nbsp;MethodBytecode
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Call:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:swank-rpc&nbsp;(swank:method-bytecode&nbsp;"hello.scala"&nbsp;12)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+<b>Example Return:</b>
+
+<dl compact="compact">
+
+	<dd><b>
+
+<pre>
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+
+</pre>
+</b></dd>
+</dl>
+</blockquote>
+<br />
+
+<div class="p"><!----></div>
 <b>swank:debug-active-vm</b>
 <br />
 
@@ -4668,11 +4865,11 @@ String:The&nbsp;thread-id&nbsp;to&nbsp;step.
 <br />
 
 <div class="p"><!----></div>
-<b>swank:debug-value-for-name</b>
+<b>swank:debug-locate-name</b>
 <br />
 
 <blockquote>
-Get the local binding for the given name at this point
+Get the binding location for the given name at this point
   in the program's execution.<br /><br />
 <b>Arguments:</b>
 
@@ -4694,7 +4891,7 @@ String:&nbsp;The&nbsp;name&nbsp;to&nbsp;search&nbsp;for.
 	<dd><b>
 
 <pre>
-A&nbsp;DebugValue
+A&nbsp;DebugLocation
 
 </pre>
 </b></dd>
@@ -4706,7 +4903,7 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-value-for-name&nbsp;"thread-2"&nbsp;"apple")&nbsp;42)
+(:swank-rpc&nbsp;(swank:debug-locate-name&nbsp;"thread-2"&nbsp;"apple")&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4718,7 +4915,7 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:return&nbsp;(:ok&nbsp;"23")&nbsp;42)
+(:return&nbsp;(:ok&nbsp;(:slot&nbsp;:thread-id&nbsp;"thread-2"&nbsp;:frame&nbsp;2&nbsp;:offset&nbsp;0))&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4727,11 +4924,11 @@ A&nbsp;DebugValue
 <br />
 
 <div class="p"><!----></div>
-<b>swank:debug-value-for-id</b>
+<b>swank:debug-value</b>
 <br />
 
 <blockquote>
-Get the current binding for the given object id.<br /><br />
+Get the value at the given location.<br /><br />
 <b>Arguments:</b>
 
 <dl compact="compact">
@@ -4739,7 +4936,7 @@ Get the current binding for the given object id.<br /><br />
 	<dd><b>
 
 <pre>
-String:&nbsp;The&nbsp;object&nbsp;id&nbsp;to&nbsp;look&nbsp;up.
+DebugLocation:&nbsp;The&nbsp;location&nbsp;from&nbsp;which&nbsp;to&nbsp;load&nbsp;the&nbsp;value.
 
 </pre>
 </b></dd>
@@ -4763,7 +4960,8 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-value-for-id&nbsp;"obj-1")&nbsp;42)
+(:swank-rpc&nbsp;(swank:debug-value&nbsp;(:type&nbsp;'element
+&nbsp;:object-id&nbsp;"23"&nbsp;:index&nbsp;2))&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4775,7 +4973,8 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:return&nbsp;(:ok&nbsp;"23")&nbsp;42)
+(:return&nbsp;(:ok&nbsp;(:val-type&nbsp;'prim&nbsp;:summary&nbsp;"23"
+&nbsp;:type-name&nbsp;"Integer"))&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4784,11 +4983,12 @@ A&nbsp;DebugValue
 <br />
 
 <div class="p"><!----></div>
-<b>swank:debug-value-for-field</b>
+<b>swank:debug-to-string</b>
 <br />
 
 <blockquote>
-Get the value bound to the given name in the given object instance.<br /><br />
+Returns the result of calling toString on the value at the
+given location<br /><br />
 <b>Arguments:</b>
 
 <dl compact="compact">
@@ -4796,8 +4996,7 @@ Get the value bound to the given name in the given object instance.<br /><br />
 	<dd><b>
 
 <pre>
-String:&nbsp;The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;object&nbsp;to&nbsp;search.
-String:&nbsp;The&nbsp;name&nbsp;of&nbsp;the&nbsp;field&nbsp;to&nbsp;search&nbsp;for.
+DebugLocation:&nbsp;The&nbsp;location&nbsp;from&nbsp;which&nbsp;to&nbsp;load&nbsp;the&nbsp;value.
 
 </pre>
 </b></dd>
@@ -4821,7 +5020,8 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-value-for-field&nbsp;"obj-22"&nbsp;"name")&nbsp;42)
+(:swank-rpc&nbsp;(swank:debug-to-string&nbsp;(:type&nbsp;'element
+&nbsp;:object-id&nbsp;"23"&nbsp;:index&nbsp;2))&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4833,7 +5033,7 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:return&nbsp;(:ok&nbsp;"Horatio&nbsp;Hornblower")&nbsp;42)
+(:return&nbsp;(:ok&nbsp;"A&nbsp;little&nbsp;lamb")&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4842,11 +5042,11 @@ A&nbsp;DebugValue
 <br />
 
 <div class="p"><!----></div>
-<b>swank:debug-value-for-stack-var</b>
+<b>swank:debug-set-value</b>
 <br />
 
 <blockquote>
-Get the value at the given offset in the given stack frame.<br /><br />
+Set the value at the given location.<br /><br />
 <b>Arguments:</b>
 
 <dl compact="compact">
@@ -4854,66 +5054,7 @@ Get the value at the given offset in the given stack frame.<br /><br />
 	<dd><b>
 
 <pre>
-Int:&nbsp;The&nbsp;stack&nbsp;frame&nbsp;in&nbsp;which&nbsp;the&nbsp;local&nbsp;is&nbsp;found.
-Int:&nbsp;The&nbsp;offset&nbsp;within&nbsp;the&nbsp;stack&nbsp;frame.
-
-</pre>
-</b></dd>
-</dl>
-<b>Return:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-A&nbsp;DebugValue
-
-</pre>
-</b></dd>
-</dl>
-<b>Example Call:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-(:swank-rpc&nbsp;(swank:debug-value-for-stack-var&nbsp;0&nbsp;2)&nbsp;42)
-
-</pre>
-</b></dd>
-</dl>
-<b>Example Return:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-(:return&nbsp;(:ok&nbsp;"Horatio&nbsp;Hornblower")&nbsp;42)
-
-</pre>
-</b></dd>
-</dl>
-</blockquote>
-<br />
-
-<div class="p"><!----></div>
-<b>swank:debug-set-stack-var</b>
-<br />
-
-<blockquote>
-Set the value at the given offset in the given stack frame.<br /><br />
-<b>Arguments:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-Int:&nbsp;The&nbsp;stack&nbsp;frame&nbsp;in&nbsp;which&nbsp;the&nbsp;local&nbsp;is&nbsp;found.
-Int:&nbsp;The&nbsp;offset&nbsp;within&nbsp;the&nbsp;stack&nbsp;frame.
+DebugLocation:&nbsp;Location&nbsp;to&nbsp;set&nbsp;value.
 String:&nbsp;A&nbsp;string&nbsp;encoded&nbsp;value.
 
 </pre>
@@ -4938,7 +5079,8 @@ Boolean:&nbsp;t&nbsp;on&nbsp;success,&nbsp;nil&nbsp;otherwise
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-set-stack-var&nbsp;0&nbsp;2&nbsp;"true")&nbsp;42)
+(:swank-rpc&nbsp;(swank:debug-set-stack-var&nbsp;(:type&nbsp;'element
+&nbsp;:object-id&nbsp;"23"&nbsp;:index&nbsp;2)&nbsp;"1")&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4951,64 +5093,6 @@ Boolean:&nbsp;t&nbsp;on&nbsp;success,&nbsp;nil&nbsp;otherwise
 
 <pre>
 (:return&nbsp;(:ok&nbsp;t)&nbsp;42)
-
-</pre>
-</b></dd>
-</dl>
-</blockquote>
-<br />
-
-<div class="p"><!----></div>
-<b>swank:debug-value-for-index</b>
-<br />
-
-<blockquote>
-Get the value at the given offset in the array specified by object id<br /><br />
-<b>Arguments:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-String:&nbsp;The&nbsp;unique&nbsp;id&nbsp;of&nbsp;the&nbsp;object&nbsp;to&nbsp;search.
-Int:&nbsp;The&nbsp;index&nbsp;of&nbsp;the&nbsp;element&nbsp;to&nbsp;return
-
-</pre>
-</b></dd>
-</dl>
-<b>Return:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-A&nbsp;DebugValue
-
-</pre>
-</b></dd>
-</dl>
-<b>Example Call:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-(:swank-rpc&nbsp;(swank:debug-value-for-index&nbsp;"obj-22"&nbsp;0)&nbsp;42)
-
-</pre>
-</b></dd>
-</dl>
-<b>Example Return:</b>
-
-<dl compact="compact">
-
-	<dd><b>
-
-<pre>
-(:return&nbsp;(:ok&nbsp;"Captain&nbsp;Bracegirdle")&nbsp;42)
 
 </pre>
 </b></dd>
