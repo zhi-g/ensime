@@ -142,6 +142,10 @@ object FileUtils {
     }).toSet
   }
 
+  def fileExtension(f: File): String = {
+    f.getName.substring(0, f.getName.lastIndexOf('.'))
+  }
+
   def canonicalizeDirs(names: Iterable[String], baseDir: File): Iterable[CanonFile] = {
     names.map { s => canonicalizeDir(s, baseDir) }.flatten
   }

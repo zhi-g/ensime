@@ -78,13 +78,16 @@ object EnsimeBuild extends Build {
             // but this doesn't work anymore. todo. fix this
             Seq("SublimeScala Snapshots Maven Repository" at "https://bitbucket.org/sublimescala/nexus/raw/master/snapshots/",
                 "SublimeScala Releases Maven Repository" at "https://bitbucket.org/sublimescala/nexus/raw/master/releases/",
-                "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2")
+                "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2",
+                "ArtifactoryOnline" at "http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"
+	      )
           else if (scalaVersion == TwoNineVersion)
             Seq("Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
                 "Sonatype OSS Repository" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
                 "Sonatype OSS Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots",
                 "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2",
-                "repo.codahale.com" at "http://repo.codahale.com")
+                "repo.codahale.com" at "http://repo.codahale.com",
+                "Typesafe Releases" at "http://repo.typesafe.com/typesafe/repo")
           else unsupportedScalaVersion(scalaVersion)
         },
         libraryDependencies <++= (scalaVersion) { scalaVersion =>
@@ -93,7 +96,8 @@ object EnsimeBuild extends Build {
               "asm" % "asm" % "3.3",
               "asm" % "asm-commons" % "3.3",
               "asm" % "asm-util" % "3.3",
-              "com.googlecode.json-simple" % "json-simple" % "1.1"
+              "com.googlecode.json-simple" % "json-simple" % "1.1",
+	      "play" % "templates_2.9.2" % "2.1-08292012"
       ) ++
           (if (scalaVersion == TwoTenVersion)
             Seq(

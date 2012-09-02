@@ -156,16 +156,25 @@ class Analyzer(
                   }
 
                   case ReloadFilesReq(files: List[File]) => {
-		    val (javas, scalas) = files.filter(_.exists).partition(
-		      _.getName.endsWith(".java"))
-		    if (!javas.isEmpty) {
-		      javaCompiler.compileFiles(javas)
-		    }
-		    if (!scalas.isEmpty) {
-		      scalaCompiler.askReloadFiles(scalas.map(createSourceFile))
+                    val all_files = files.filter(_.exists)
+
+                    val javas = all_files.filter(_.getName.endsWith(
+			".java"))
+                    if (!javas.isEmpty) {
+                      javaCompiler.compileFiles(javas)
+                    }
+
+                    val scalas = all_files.filter(_.getName.endsWith(
+			".scala"))
+                    val templates = all_files.filter(_.getName.endsWith(
+			".scala.html"))
+                    val sources = (scalas.map(createSourceFile) ++
+                      PlayTemplates.generateSources(reporter, templates))
+                    if (!sources.isEmpty) {
+                      scalaCompiler.askReloadFiles(sources)
                       scalaCompiler.askNotifyWhenReady()
                       project ! RPCResultEvent(toWF(true), callId)
-		    }
+                    }
                   }
 
                   case PatchSourceReq(
@@ -300,24 +309,24 @@ class Analyzer(
                   }
 
                   case SymbolDesignationsReq(file: File, start: Int,
-		    end: Int, tpes: List[Symbol]) => {
-		    if (!FileUtils.isScalaSourceFile(file)) {
-		      project ! RPCResultEvent(
-			toWF(SymbolDesignations(file.getPath, List())), callId)
-		    } else {
-                    val f = createSourceFile(file)
-                    val clampedEnd = math.max(end, start)
-                    val pos = new RangePosition(f, start, start, clampedEnd)
-                    if (!tpes.isEmpty) {
-                      val syms = scalaCompiler.askSymbolDesignationsInRegion(
-			pos, tpes)
-                      project ! RPCResultEvent(toWF(syms), callId)
-                    } else {
+                    end: Int, tpes: List[Symbol]) => {
+                    if (!FileUtils.isScalaSourceFile(file)) {
                       project ! RPCResultEvent(
-			toWF(SymbolDesignations(f.path, List())), callId)
+                        toWF(SymbolDesignations(file.getPath, List())), callId)
+                    } else {
+                      val f = createSourceFile(file)
+                      val clampedEnd = math.max(end, start)
+                      val pos = new RangePosition(f, start, start, clampedEnd)
+                      if (!tpes.isEmpty) {
+                        val syms = scalaCompiler.askSymbolDesignationsInRegion(
+                          pos, tpes)
+                        project ! RPCResultEvent(toWF(syms), callId)
+                      } else {
+                        project ! RPCResultEvent(
+                          toWF(SymbolDesignations(f.path, List())), callId)
+                      }
                     }
                   }
-		}
                 }
               }
             } catch {
