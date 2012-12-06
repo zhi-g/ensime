@@ -98,7 +98,7 @@
 
 <div class="p"><!----></div>
  
-<center><b>Last Updated</b>: 08/25/2012
+<center><b>Last Updated</b>: 12/06/2012
 </center>
 
 <div class="p"><!----></div>
@@ -504,7 +504,7 @@ String:&nbsp;module&nbsp;name
 <br />
 
 <div class="p"><!----></div>
-<b>:name</b>
+<b>:depends-on-modules</b>
 <br />
 
 <blockquote>
@@ -1596,7 +1596,7 @@ At the application level, the s-expressions encode RPC calls, RPC responses, and
 
 #&nbsp;Server&nbsp;asks&nbsp;client&nbsp;to&nbsp;display&nbsp;a&nbsp;user&nbsp;message.&nbsp;
 #&nbsp;Note:&nbsp;this&nbsp;is&nbsp;not&nbsp;part&nbsp;of&nbsp;any&nbsp;RPC&nbsp;call&nbsp;-&nbsp;it's&nbsp;just&nbsp;an&nbsp;event&nbsp;from&nbsp;the&nbsp;server.
-(:background-message&nbsp;"Initializing&nbsp;Analyzer.&nbsp;Please&nbsp;wait...")
+(:background-message&nbsp;105&nbsp;"Initializing&nbsp;Analyzer.&nbsp;Please&nbsp;wait...")
 
 #&nbsp;Server&nbsp;alerts&nbsp;client&nbsp;that&nbsp;the&nbsp;analyzer&nbsp;is&nbsp;now&nbsp;ready&nbsp;for&nbsp;RPC&nbsp;requests.
 (:compiler-ready&nbsp;t)
@@ -1754,6 +1754,7 @@ Describes a symbol found in a search operation.
 :name&nbsp;//String:Qualified&nbsp;name&nbsp;of&nbsp;symbol.
 :local-name&nbsp;//String:Unqualified&nbsp;name&nbsp;of&nbsp;symbol
 :decl-as&nbsp;//Symbol:What&nbsp;kind&nbsp;of&nbsp;symbol&nbsp;this&nbsp;is.
+:owner-name&nbsp;//String:If&nbsp;symbol&nbsp;is&nbsp;a&nbsp;method,&nbsp;gives&nbsp;the&nbsp;qualified&nbsp;owner&nbsp;type.
 :pos&nbsp;//Position:Where&nbsp;is&nbsp;this&nbsp;symbol&nbsp;declared?
 )
 
@@ -4081,7 +4082,7 @@ Int:Procedure&nbsp;Id&nbsp;of&nbsp;the&nbsp;refactoring.
 	<dd><b>
 
 <pre>
-(:return&nbsp;(:ok&nbsp;t))
+(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
 
 </pre>
 </b></dd>
@@ -4267,7 +4268,14 @@ A&nbsp;MethodBytecode
 	<dd><b>
 
 <pre>
-(:return&nbsp;(:ok&nbsp;t)&nbsp;42)
+(:return
+(:ok&nbsp;(
+:class-name&nbsp;"SomeClassName"
+:name&nbsp;"SomeMethodName"
+:signature&nbsp;??
+:bytcode&nbsp;("opName"&nbsp;"opDescription"&nbsp;...
+)
+42)
 
 </pre>
 </b></dd>
@@ -4627,7 +4635,7 @@ List&nbsp;of&nbsp;Position:A&nbsp;list&nbsp;of&nbsp;positions
 	<dd><b>
 
 <pre>
-(:return&nbsp;((:file&nbsp;"hello.scala"&nbsp;:line&nbsp;1)
+(:return&nbsp;(:ok&nbsp;(:file&nbsp;"hello.scala"&nbsp;:line&nbsp;1)
 (:file&nbsp;"hello.scala"&nbsp;:line&nbsp;23))&nbsp;42)
 
 </pre>
@@ -4960,7 +4968,7 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-value&nbsp;(:type&nbsp;'element
+(:swank-rpc&nbsp;(swank:debug-value&nbsp;(:type&nbsp;element
 &nbsp;:object-id&nbsp;"23"&nbsp;:index&nbsp;2))&nbsp;42)
 
 </pre>
@@ -4973,7 +4981,7 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:return&nbsp;(:ok&nbsp;(:val-type&nbsp;'prim&nbsp;:summary&nbsp;"23"
+(:return&nbsp;(:ok&nbsp;(:val-type&nbsp;prim&nbsp;:summary&nbsp;"23"
 &nbsp;:type-name&nbsp;"Integer"))&nbsp;42)
 
 </pre>
@@ -5020,7 +5028,7 @@ A&nbsp;DebugValue
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-to-string&nbsp;(:type&nbsp;'element
+(:swank-rpc&nbsp;(swank:debug-to-string&nbsp;(:type&nbsp;element
 &nbsp;:object-id&nbsp;"23"&nbsp;:index&nbsp;2))&nbsp;42)
 
 </pre>
@@ -5079,7 +5087,7 @@ Boolean:&nbsp;t&nbsp;on&nbsp;success,&nbsp;nil&nbsp;otherwise
 	<dd><b>
 
 <pre>
-(:swank-rpc&nbsp;(swank:debug-set-stack-var&nbsp;(:type&nbsp;'element
+(:swank-rpc&nbsp;(swank:debug-set-stack-var&nbsp;(:type&nbsp;element
 &nbsp;:object-id&nbsp;"23"&nbsp;:index&nbsp;2)&nbsp;"1")&nbsp;42)
 
 </pre>
