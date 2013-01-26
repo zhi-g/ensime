@@ -29,6 +29,7 @@ package org.ensime.server
 
 import java.io.File
 import org.ensime.util.FileUtils
+import org.ensime.util.Profiling
 import org.ensime.config.ProjectConfig
 import org.ensime.indexer.ClassFileIndex
 import org.ensime.indexer.LuceneIndex
@@ -40,11 +41,28 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import scala.collection.immutable.Vector
+import scala.collection.immutable.IndexedSeq
+
+import scala.tools.nsc.interactive.{ CompilerControl, Global }
+import scala.tools.nsc.util.{ SourceFile, BatchSourceFile }
+import scala.tools.nsc.Settings
+import scala.tools.nsc.reporters.{Reporter, StoreReporter}
+import java.util.concurrent.{Executors, ExecutorService}
+
 
 import scala.actors._
 import scala.actors.Actor._
 
-case class ShutdownReq()
+class RoundRobin[T](items: IndexedSeq[T]) {
+  var i = 0
+  def next():T = {
+    val item = items(i)
+    i = (i + 1) % items.length
+    item
+  }
+  def foreach(action: T => Unit) = items.foreach(action)
+}
 
 trait PIGIndex {
 
@@ -65,16 +83,59 @@ trait PIGIndex {
     }
   }
 
-  def index(files: Set[File]) {
-    doTx { db =>
+  case class Die()
+  case class ParseFile(f:File)
 
-      val tpe = db.createNode()
-      tpe.setProperty(PropName, "MyType")
-
-      val method = db.createNode()
-      method.createRelationshipTo(tpe, RelMemberOf)
-
+  class Worker(compiler:Global) extends Actor {
+    def act() {
+      loop {
+        receive {
+          case ParseFile(f:File) => {
+            val sf = compiler.getSourceFile(f.getAbsolutePath())
+            val tree = compiler.parseTree(sf)
+            println("parsed " + f)
+            doTx { db =>
+              //      val tpe = db.createNode()
+              //      tpe.setProperty(PropName, "MyType")
+              //      val method = db.createNode()
+              //      method.createRelationshipTo(tpe, RelMemberOf)
+            }
+            reply(f)
+          }
+          case Die() => exit()
+        }
+      }
     }
+  }
+
+  def index(files: Set[File]) {
+    val MaxCompilers = 5
+    val MaxWorkers = 5
+    var i = 0
+
+    def newCompiler():Global = {
+      val settings = new Settings(Console.println)
+      settings.usejavacp.value = false
+      settings.classpath.value = "dist_2.10.0/lib/scala-library.jar"
+      val reporter = new StoreReporter()
+      new Global(settings, reporter)
+    }
+
+    val compilers = new RoundRobin(
+      (0 until MaxCompilers).map{i => newCompiler()})
+
+    val workers = new RoundRobin(
+      (0 until MaxWorkers).map{i =>
+        val w = new Worker(compilers.next())
+        w.start()
+      })
+
+    val futures = files.map { f => workers.next() !! ParseFile(f) }
+
+    val results = futures.map{f => f()}
+
+    compilers.foreach{ _.askShutdown() }
+    workers.foreach { _ ! Die() }
   }
 
   def indexDirectories(root: File, sourceRoots: Iterable[File]) {
@@ -83,6 +144,9 @@ trait PIGIndex {
   }
 
 }
+
+
+case class ShutdownReq()
 
 class PIG(
   project: Project,
@@ -161,7 +225,9 @@ object PIG extends PIGIndex {
   var graphDb: GraphDatabaseService = null
   def main(args: Array[String]) {
     graphDb = (new GraphDatabaseFactory()).newEmbeddedDatabase("neoj4-db");
-    indexDirectories(new File("."), args.map(new File(_)))
+    Profiling.time {
+      indexDirectories(new File("."), args.map(new File(_)))
+    }
   }
 
 }

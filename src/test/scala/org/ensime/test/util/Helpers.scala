@@ -16,8 +16,6 @@ object Helpers{
 
   def withPresCompiler(action:RichCompilerControl => Any ) =  {
     val settings = new Settings(Console.println)
-
-
     val propFile = new File("./project/build.properties")
     val props = JavaProperties.load(propFile)
     val v = props.get("build.scala.versions") match {
