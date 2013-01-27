@@ -129,7 +129,6 @@ trait PIGIndex {
               tpe.setProperty(PropName, tpeName)
               val existingFileNode = fileNode(f)
               tpe.createRelationshipTo(existingFileNode, RelFromFile)
-              println("connecting to ")
               tpeIndex.add(tpe, "typeName", tpeName)
             }
             reply(f)
@@ -259,10 +258,15 @@ class PIG(
 
 object PIG extends PIGIndex {
   var graphDb: GraphDatabaseService = null
+  var fileIndex: Index[Node] = null
+  var tpeIndex: Index[Node] = null
+
   def main(args: Array[String]) {
     System.setProperty("actors.corePoolSize", "10")
     System.setProperty("actors.maxPoolSize", "100")
     graphDb = (new GraphDatabaseFactory()).newEmbeddedDatabase("neoj4-db");
+    fileIndex = graphDb.index().forNodes("fileIndex");
+    tpeIndex = graphDb.index().forNodes("tpeIndex");
     Profiling.time {
       indexDirectories(new File("/Users/aemon/"), args.map(new File(_)))
     }

@@ -71,27 +71,18 @@ object EnsimeBuild extends Build {
           scalaVersion := TwoTenVersion,
           crossScalaVersions := Seq(TwoNineVersion, TwoTenVersion),
           resolvers <++= (scalaVersion) { scalaVersion =>
-            if (scalaVersion == TwoTenVersion)
-              // currently SBT will download scala-library and scala-compiler from oss.sonatype.org no matter what
-              // but we would like it to use our repository, so that sudden changes in SNAPSHOT don't break Ensime
-              // prevously to do that we'd just create `Resolver.withDefaultResolvers(rs, mavenCentral = true, scalaTools = false)`
-              // but this doesn't work anymore. todo. fix this
-              Seq("SublimeScala Snapshots Maven Repository" at "https://bitbucket.org/sublimescala/nexus/raw/master/snapshots/",
-                "SublimeScala Releases Maven Repository" at "https://bitbucket.org/sublimescala/nexus/raw/master/releases/",
-                "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2",
-                "neo4j-public-repository" at "http://m2.neo4j.org/releases")
-            else if (scalaVersion == TwoNineVersion)
-              Seq("Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
-                "Sonatype OSS Repository" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
-                "Sonatype OSS Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots",
-                "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2",
-                "repo.codahale.com" at "http://repo.codahale.com")
-            else unsupportedScalaVersion(scalaVersion)
+            Seq(
+              "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
+              "Sonatype OSS Repository" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
+              "Sonatype OSS Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots",
+              "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2",
+              "repo.codahale.com" at "http://repo.codahale.com",
+              "neo4j-public-repository" at "http://m2.neo4j.org/releases")
           },
           libraryDependencies <++= (scalaVersion) { scalaVersion =>
             Seq(
-              "org.neo4j" % "neo4j-lucene-index" % "1.8" exclude("org.neo4j", "neo4j-udc"),
               "org.apache.lucene" % "lucene-core" % "3.5.0",
+              "org.neo4j" % "neo4j-lucene-index" % "1.8" exclude("org.neo4j", "neo4j-udc"),
               "org.sonatype.tycho" % "org.eclipse.jdt.core" % "3.6.0.v_A58" % "compile;runtime;test",
               "asm" % "asm" % "3.3",
               "asm" % "asm-commons" % "3.3",
@@ -101,8 +92,7 @@ object EnsimeBuild extends Build {
             (if (scalaVersion == TwoTenVersion)
               Seq(
                 "org.scalariform" %% "scalariform" % "0.1.3" % "compile;runtime;test",
-                // test(xeno-by): rebuild ScalaTest for 2.10.0-SNAPSHOT
-                // "org.scalatest" %% "scalatest" % "2.0-SNAPSHOT" % "test",
+                "org.scalatest" % "scalatest_2.10.0" % "1.8" % "test",
                 "org.scala-lang" % "scala-compiler" % scalaVersion % "compile;runtime;test",
                 "org.scala-lang" % "scala-reflect" % scalaVersion % "compile;runtime;test",
                 "org.scala-lang" % "scala-actors" % scalaVersion % "compile;runtime;test")
