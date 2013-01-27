@@ -112,10 +112,64 @@ trait PIGIndex {
     }
   }
 
+  trait Extensions { self: Global =>
+    import scala.tools.nsc.symtab.Flags._
+    import scala.tools.nsc.util.RangePosition
+    class TreeTraverser extends Traverser {
+
+      override def traverse(t: Tree) {
+        val treeP = t.pos
+        if (!treeP.isTransparent) {
+          try {
+            t match {
+
+              case PackageDef(pid, stats) =>
+
+              case Import(expr, selectors) =>
+
+              case ClassDef(mods, name, tparams, impl) => {
+                println("class:" + name)
+              }
+
+              case ModuleDef(mods, name, impl) => {
+                println("object:" + name)
+              }
+
+              case ValDef(mods, name, tpt, rhs) => {
+                println("val:" + name)
+              }
+
+              case DefDef(mods, name, tparams, vparamss, tpt, rhs) => {
+                println("def:" + name)
+              }
+
+              case TypeDef(mods, name, tparams, rhs) => {
+                println("type:" + name)
+              }
+
+              case LabelDef(name, params, rhs) => {
+                println("label:" + name)
+              }
+
+              case _ => {}
+            }
+          }
+          catch{
+            case e : Throwable => {
+              System.err.println("Error in AST traverse:")
+              e.printStackTrace(System.err);
+            }
+          }
+          super.traverse(t)
+        }
+      }
+    }
+  }
+
   case class Die()
   case class ParseFile(f:File)
 
-  class Worker(compiler:Global) extends Actor {
+  class Worker(compiler:Global with Extensions) extends Actor {
     def act() {
       loop {
         receive {
@@ -124,6 +178,8 @@ trait PIGIndex {
             val tree = compiler.parseTree(sf)
             println("parsed " + f)
             doTx { db =>
+              val traverser = new compiler.TreeTraverser
+              traverser.traverse(tree)
               val tpe = db.createNode()
               val tpeName = "MyType"
               tpe.setProperty(PropName, tpeName)
@@ -144,12 +200,12 @@ trait PIGIndex {
     val MaxWorkers = 5
     var i = 0
 
-    def newCompiler():Global = {
+    def newCompiler(): Global with Extensions = {
       val settings = new Settings(Console.println)
       settings.usejavacp.value = false
       settings.classpath.value = "dist_2.10.0/lib/scala-library.jar"
       val reporter = new StoreReporter()
-      new Global(settings, reporter)
+      new Global(settings, reporter) with Extensions {}
     }
 
     val compilers = new RoundRobin(
