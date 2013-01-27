@@ -41,6 +41,8 @@ import org.neo4j.graphdb.DynamicRelationshipType;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexHits;
 import scala.collection.immutable.Vector
 import scala.collection.immutable.IndexedSeq
 
@@ -67,9 +69,13 @@ class RoundRobin[T](items: IndexedSeq[T]) {
 trait PIGIndex {
 
   val PropName = "name"
+  val PropPath = "path"
   val RelMemberOf = DynamicRelationshipType.withName("memberOf")
+  val RelFromFile = DynamicRelationshipType.withName("fromFile")
 
   protected def graphDb: GraphDatabaseService
+  protected def fileIndex : Index[Node]
+  protected def tpeIndex : Index[Node]
 
   protected def shutdown = { graphDb.shutdown }
 
@@ -80,6 +86,29 @@ trait PIGIndex {
       tx.success()
     } finally {
       tx.finish()
+    }
+  }
+
+  private def foreachHit(hits: IndexHits[Node]) (f: Node => Unit) = {
+    import scala.collection.JavaConversions
+    try {
+      JavaConversions.iterableAsScalaIterable(hits).foreach(f)
+    } finally {
+      hits.close();
+    }
+  }
+
+  private def fileNode(f: File): Node = {
+    import scala.collection.JavaConversions
+    val fileNode = JavaConversions.iterableAsScalaIterable(
+      fileIndex.get("path", f.getAbsolutePath)).headOption
+    fileNode match {
+      case Some(node) => node
+      case None => {
+        val node = graphDb.createNode()
+        node.setProperty(PropPath, f.getAbsolutePath)
+        node
+      }
     }
   }
 
@@ -95,10 +124,13 @@ trait PIGIndex {
             val tree = compiler.parseTree(sf)
             println("parsed " + f)
             doTx { db =>
-              //      val tpe = db.createNode()
-              //      tpe.setProperty(PropName, "MyType")
-              //      val method = db.createNode()
-              //      method.createRelationshipTo(tpe, RelMemberOf)
+              val tpe = db.createNode()
+              val tpeName = "MyType"
+              tpe.setProperty(PropName, tpeName)
+              val existingFileNode = fileNode(f)
+              tpe.createRelationshipTo(existingFileNode, RelFromFile)
+              println("connecting to ")
+              tpeIndex.add(tpe, "typeName", tpeName)
             }
             reply(f)
           }
@@ -109,7 +141,7 @@ trait PIGIndex {
   }
 
   def index(files: Set[File]) {
-    val MaxCompilers = 5
+    val MaxCompilers = 1
     val MaxWorkers = 5
     var i = 0
 
@@ -157,12 +189,16 @@ class PIG(
   import protocol._
 
   var graphDb: GraphDatabaseService = null
+  var fileIndex: Index[Node] = null
+  var tpeIndex: Index[Node] = null
 
   def act() {
 
     Runtime.getRuntime.addShutdownHook(new Thread() {override def run = shutdown})
     val factory = new GraphDatabaseFactory()
     graphDb = factory.newEmbeddedDatabase("neoj4-db");
+    fileIndex = graphDb.index().forNodes("fileIndex");
+    tpeIndex = graphDb.index().forNodes("tpeIndex");
 
     indexDirectories(config.root, config.sourceRoots)
     loop {
@@ -224,9 +260,11 @@ class PIG(
 object PIG extends PIGIndex {
   var graphDb: GraphDatabaseService = null
   def main(args: Array[String]) {
+    System.setProperty("actors.corePoolSize", "10")
+    System.setProperty("actors.maxPoolSize", "100")
     graphDb = (new GraphDatabaseFactory()).newEmbeddedDatabase("neoj4-db");
     Profiling.time {
-      indexDirectories(new File("."), args.map(new File(_)))
+      indexDirectories(new File("/Users/aemon/"), args.map(new File(_)))
     }
   }
 
