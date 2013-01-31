@@ -45,6 +45,7 @@ import org.neo4j.graphdb.index.Index;
 import org.neo4j.graphdb.index.IndexHits;
 import scala.collection.immutable.Vector
 import scala.collection.immutable.IndexedSeq
+import scala.collection.mutable.ArrayStack
 
 import scala.tools.nsc.interactive.{ CompilerControl, Global }
 import scala.tools.nsc.util.{ SourceFile, BatchSourceFile }
@@ -70,8 +71,15 @@ trait PIGIndex {
 
   val PropName = "name"
   val PropPath = "path"
+  val PropNodeType = "nodeType"
+  val NodeTypeFile = "file"
+  val NodeTypePackage = "package"
+  val NodeTypeType = "type"
+  val NodeTypeMethod = "method"
+  val NodeTypeImport = "import"
   val RelMemberOf = DynamicRelationshipType.withName("memberOf")
-  val RelFromFile = DynamicRelationshipType.withName("fromFile")
+  val RelInFile = DynamicRelationshipType.withName("inFile")
+  val RelContainedBy = DynamicRelationshipType.withName("containedBy")
 
   protected def graphDb: GraphDatabaseService
   protected def fileIndex : Index[Node]
@@ -94,11 +102,11 @@ trait PIGIndex {
     try {
       JavaConversions.iterableAsScalaIterable(hits).foreach(f)
     } finally {
-      hits.close();
+      hits.close()
     }
   }
 
-  private def fileNode(f: File): Node = {
+  private def findFileNode(f: File): Node = {
     import scala.collection.JavaConversions
     val fileNode = JavaConversions.iterableAsScalaIterable(
       fileIndex.get("path", f.getAbsolutePath)).headOption
@@ -107,6 +115,7 @@ trait PIGIndex {
       case None => {
         val node = graphDb.createNode()
         node.setProperty(PropPath, f.getAbsolutePath)
+        node.setProperty(PropNodeType, NodeTypeFile)
         node
       }
     }
@@ -115,24 +124,59 @@ trait PIGIndex {
   trait Extensions { self: Global =>
     import scala.tools.nsc.symtab.Flags._
     import scala.tools.nsc.util.RangePosition
-    class TreeTraverser extends Traverser {
+    class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
 
       override def traverse(t: Tree) {
+
+        val fileNode = findFileNode(f)
+        val stack = new ArrayStack[Node]
+        stack.push(fileNode)
+
+        //tpeIndex.add(tpe, "typeName", tpeName)
+
         val treeP = t.pos
         if (!treeP.isTransparent) {
           try {
             t match {
 
-              case PackageDef(pid, stats) =>
+              case PackageDef(pid, stats) => {
+                val node = db.createNode()
+                node.setProperty(PropNodeType, NodeTypePackage)
+                node.createRelationshipTo(fileNode, RelInFile)
+                stack.push(node)
+                super.traverse(t)
+                stack.pop()
+              }
 
-              case Import(expr, selectors) =>
+              case Import(expr, selectors) => {
+                for (impSel <- selectors) {
+                  val node = db.createNode()
+                  node.setProperty(PropNodeType, NodeTypeImport)
+                  node.setProperty(PropName, impSel.name.decode)
+                  node.createRelationshipTo(stack.top, RelContainedBy)
+                }
+              }
 
               case ClassDef(mods, name, tparams, impl) => {
-                println("class:" + name)
+                val node = db.createNode()
+                node.setProperty(PropNodeType, NodeTypeType)
+                node.setProperty(PropName, name.decode)
+                node.createRelationshipTo(fileNode, RelInFile)
+                node.createRelationshipTo(stack.top, RelContainedBy)
+                stack.push(node)
+                super.traverse(t)
+                stack.pop()
               }
 
               case ModuleDef(mods, name, impl) => {
-                println("object:" + name)
+                val node = db.createNode()
+                node.setProperty(PropNodeType, NodeTypeType)
+                node.setProperty(PropName, name.decode)
+                node.createRelationshipTo(fileNode, RelInFile)
+                node.createRelationshipTo(stack.top, RelContainedBy)
+                stack.push(node)
+                super.traverse(t)
+                stack.pop()
               }
 
               case ValDef(mods, name, tpt, rhs) => {
@@ -140,7 +184,14 @@ trait PIGIndex {
               }
 
               case DefDef(mods, name, tparams, vparamss, tpt, rhs) => {
-                println("def:" + name)
+                val node = db.createNode()
+                node.setProperty(PropNodeType, NodeTypeMethod)
+                node.setProperty(PropName, name.decode)
+                node.createRelationshipTo(fileNode, RelInFile)
+                node.createRelationshipTo(stack.top, RelContainedBy)
+                stack.push(node)
+                super.traverse(t)
+                stack.pop()
               }
 
               case TypeDef(mods, name, tparams, rhs) => {
@@ -151,7 +202,7 @@ trait PIGIndex {
                 println("label:" + name)
               }
 
-              case _ => {}
+              case _ => { super.traverse(t) }
             }
           }
           catch{
@@ -160,7 +211,6 @@ trait PIGIndex {
               e.printStackTrace(System.err);
             }
           }
-          super.traverse(t)
         }
       }
     }
@@ -178,14 +228,8 @@ trait PIGIndex {
             val tree = compiler.parseTree(sf)
             println("parsed " + f)
             doTx { db =>
-              val traverser = new compiler.TreeTraverser
+              val traverser = new compiler.TreeTraverser(f, db)
               traverser.traverse(tree)
-              val tpe = db.createNode()
-              val tpeName = "MyType"
-              tpe.setProperty(PropName, tpeName)
-              val existingFileNode = fileNode(f)
-              tpe.createRelationshipTo(existingFileNode, RelFromFile)
-              tpeIndex.add(tpe, "typeName", tpeName)
             }
             reply(f)
           }
@@ -225,9 +269,9 @@ trait PIGIndex {
     workers.foreach { _ ! Die() }
   }
 
-  def indexDirectories(root: File, sourceRoots: Iterable[File]) {
+  def indexDirectories(sourceRoots: Iterable[File]) {
     index(FileUtils.expandRecursively(
-      root, sourceRoots, FileUtils.isValidSourceFile _).toSet)
+      new File("."), sourceRoots, FileUtils.isValidSourceFile _).toSet)
   }
 
 }
@@ -255,7 +299,7 @@ class PIG(
     fileIndex = graphDb.index().forNodes("fileIndex");
     tpeIndex = graphDb.index().forNodes("tpeIndex");
 
-    indexDirectories(config.root, config.sourceRoots)
+    indexDirectories(config.sourceRoots)
     loop {
       try {
         receive {
@@ -324,7 +368,7 @@ object PIG extends PIGIndex {
     fileIndex = graphDb.index().forNodes("fileIndex");
     tpeIndex = graphDb.index().forNodes("tpeIndex");
     Profiling.time {
-      indexDirectories(new File("/Users/aemon/"), args.map(new File(_)))
+      indexDirectories(args.map(new File(_)))
     }
   }
 
