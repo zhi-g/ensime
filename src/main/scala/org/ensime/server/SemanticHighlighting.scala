@@ -206,10 +206,10 @@ trait SemanticHighlighting { self: Global with Helpers =>
           }
 	}
 	catch{
-	  case e : Throwable => {
-	    System.err.println("Error in AST traverse:")
-	    e.printStackTrace(System.err);
-	  }
+          case e : Throwable => {
+            System.err.println("Error in AST traverse:")
+            e.printStackTrace(System.err);
+          }
 	}
         super.traverse(t)
       }

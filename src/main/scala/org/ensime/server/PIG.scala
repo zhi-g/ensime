@@ -37,12 +37,12 @@ import org.ensime.protocol.ProtocolConversions
 
 import org.objectweb.asm.ClassReader
 
-import org.neo4j.graphdb.DynamicRelationshipType;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
-import org.neo4j.graphdb.index.Index;
-import org.neo4j.graphdb.index.IndexHits;
+import org.neo4j.graphdb.DynamicRelationshipType
+import org.neo4j.graphdb.GraphDatabaseService
+import org.neo4j.graphdb.Node
+import org.neo4j.graphdb.factory.GraphDatabaseFactory
+import org.neo4j.graphdb.index.Index
+import org.neo4j.graphdb.index.IndexHits
 import scala.collection.immutable.Vector
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable.ArrayStack
@@ -72,14 +72,23 @@ trait PIGIndex {
   val PropName = "name"
   val PropPath = "path"
   val PropNodeType = "nodeType"
+
   val NodeTypeFile = "file"
   val NodeTypePackage = "package"
   val NodeTypeType = "type"
   val NodeTypeMethod = "method"
   val NodeTypeImport = "import"
+  val NodeTypeParam = "param"
+  val NodeTypeVarDef = "varDef"
+  val NodeTypeValDef = "valDef"
+  val NodeTypeVarField = "varField"
+  val NodeTypeValField = "valField"
+
   val RelMemberOf = DynamicRelationshipType.withName("memberOf")
   val RelInFile = DynamicRelationshipType.withName("inFile")
   val RelContainedBy = DynamicRelationshipType.withName("containedBy")
+  val RelParamOf = DynamicRelationshipType.withName("paramOf")
+  val RelFileOf = DynamicRelationshipType.withName("fileOf")
 
   protected def graphDb: GraphDatabaseService
   protected def fileIndex : Index[Node]
@@ -106,16 +115,20 @@ trait PIGIndex {
     }
   }
 
-  private def findFileNode(f: File): Node = {
+  private def findFileNode(db: GraphDatabaseService, f: File): Node = {
     import scala.collection.JavaConversions
     val fileNode = JavaConversions.iterableAsScalaIterable(
       fileIndex.get("path", f.getAbsolutePath)).headOption
     fileNode match {
       case Some(node) => node
       case None => {
-        val node = graphDb.createNode()
+        val node = db.createNode()
+        val refNode = db.getReferenceNode
+        node.createRelationshipTo(refNode, RelFileOf)
+        println("reference ref node form: " + f)
         node.setProperty(PropPath, f.getAbsolutePath)
         node.setProperty(PropNodeType, NodeTypeFile)
+        fileIndex.putIfAbsent(node, "path", f.getAbsolutePath)
         node
       }
     }
@@ -128,7 +141,7 @@ trait PIGIndex {
 
       override def traverse(t: Tree) {
 
-        val fileNode = findFileNode(f)
+        val fileNode = findFileNode(db, f)
         val stack = new ArrayStack[Node]
         stack.push(fileNode)
 
@@ -180,7 +193,28 @@ trait PIGIndex {
               }
 
               case ValDef(mods, name, tpt, rhs) => {
-                println("val:" + name)
+                val node = db.createNode()
+                node.setProperty(PropNodeType, NodeTypeType)
+                node.setProperty(PropName, name.decode)
+                node.createRelationshipTo(fileNode, RelInFile)
+                node.createRelationshipTo(stack.top, RelContainedBy)
+                val isField =
+                  stack.top.getProperty(PropNodeType) == NodeTypeType
+                if (mods.hasFlag(PARAM)) {
+                  node.setProperty(PropNodeType, NodeTypeParam)
+                  node.createRelationshipTo(stack.top, RelParamOf)
+                } else if (mods.hasFlag(MUTABLE) && !isField) {
+                  node.setProperty(PropNodeType, NodeTypeVarDef)
+                } else if (!isField) {
+                  node.setProperty(PropNodeType, NodeTypeValDef)
+                } else if (mods.hasFlag(MUTABLE) && isField) {
+                  node.setProperty(PropNodeType, NodeTypeVarField)
+                } else if (isField) {
+                  node.setProperty(PropNodeType, NodeTypeValField)
+                }
+                //stack.push(node)
+                //super.traverse(t)
+                //stack.pop()
               }
 
               case DefDef(mods, name, tparams, vparamss, tpt, rhs) => {
@@ -195,11 +229,9 @@ trait PIGIndex {
               }
 
               case TypeDef(mods, name, tparams, rhs) => {
-                println("type:" + name)
               }
 
               case LabelDef(name, params, rhs) => {
-                println("label:" + name)
               }
 
               case _ => { super.traverse(t) }
@@ -208,7 +240,7 @@ trait PIGIndex {
           catch{
             case e : Throwable => {
               System.err.println("Error in AST traverse:")
-              e.printStackTrace(System.err);
+              e.printStackTrace(System.err)
             }
           }
         }
@@ -240,7 +272,7 @@ trait PIGIndex {
   }
 
   def index(files: Set[File]) {
-    val MaxCompilers = 1
+    val MaxCompilers = 5
     val MaxWorkers = 5
     var i = 0
 
@@ -262,9 +294,7 @@ trait PIGIndex {
       })
 
     val futures = files.map { f => workers.next() !! ParseFile(f) }
-
     val results = futures.map{f => f()}
-
     compilers.foreach{ _.askShutdown() }
     workers.foreach { _ ! Die() }
   }
@@ -292,18 +322,16 @@ class PIG(
   var tpeIndex: Index[Node] = null
 
   def act() {
-
-    Runtime.getRuntime.addShutdownHook(new Thread() {override def run = shutdown})
     val factory = new GraphDatabaseFactory()
-    graphDb = factory.newEmbeddedDatabase("neoj4-db");
-    fileIndex = graphDb.index().forNodes("fileIndex");
-    tpeIndex = graphDb.index().forNodes("tpeIndex");
-
+    graphDb = factory.newEmbeddedDatabase("neoj4-db")
+    fileIndex = graphDb.index().forNodes("fileIndex")
+    tpeIndex = graphDb.index().forNodes("tpeIndex")
     indexDirectories(config.sourceRoots)
     loop {
       try {
         receive {
           case ShutdownReq() => {
+            graphDb.shutdown()
             exit('stop)
           }
           case RPCRequestEvent(req: Any, callId: Int) => {
@@ -364,12 +392,13 @@ object PIG extends PIGIndex {
   def main(args: Array[String]) {
     System.setProperty("actors.corePoolSize", "10")
     System.setProperty("actors.maxPoolSize", "100")
-    graphDb = (new GraphDatabaseFactory()).newEmbeddedDatabase("neoj4-db");
-    fileIndex = graphDb.index().forNodes("fileIndex");
-    tpeIndex = graphDb.index().forNodes("tpeIndex");
+    graphDb = (new GraphDatabaseFactory()).newEmbeddedDatabase("neo4j-db")
+    fileIndex = graphDb.index().forNodes("fileIndex")
+    tpeIndex = graphDb.index().forNodes("tpeIndex")
     Profiling.time {
       indexDirectories(args.map(new File(_)))
     }
+    graphDb.shutdown()
   }
 
 }
