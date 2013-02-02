@@ -98,7 +98,7 @@
 
 <div class="p"><!----></div>
  
-<center><b>Last Updated</b>: 12/06/2012
+<center><b>Last Updated</b>: 02/02/2013
 </center>
 
 <div class="p"><!----></div>
@@ -1613,7 +1613,7 @@ At the application level, the s-expressions encode RPC calls, RPC responses, and
 
 <div class="p"><!----></div>
      <h3><a name="tth_sEcC.3">
-C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.8.3</h3>
+C.3</a>&nbsp;&nbsp;ENSIME Swank RPC: Version 0.8.4</h3>
 
 <div class="p"><!----></div>
       <h4><a name="tth_sEcC.3.1">
@@ -1622,6 +1622,8 @@ C.3.1</a>&nbsp;&nbsp;Protocol Change Log</h4>
 <div class="p"><!----></div>
 
 <pre>
+0.8.5
+&nbsp;&nbsp;Add&nbsp;local-name&nbsp;to&nbsp;SymbolInfo
 0.8.3
 &nbsp;&nbsp;Add&nbsp;debug-to-string&nbsp;call.
 &nbsp;&nbsp;Refactor&nbsp;debug-value-for-name&nbsp;to&nbsp;debug-locate-name&nbsp;+&nbsp;debug-value
@@ -1935,6 +1937,7 @@ Description of a Scala symbol.
 <pre>
 (
 :name&nbsp;//String:Name&nbsp;of&nbsp;this&nbsp;symbol.
+:local-name&nbsp;//String:Unqualified&nbsp;name&nbsp;of&nbsp;this&nbsp;symbol.
 :type&nbsp;//TypeInfo:The&nbsp;type&nbsp;of&nbsp;this&nbsp;symbol.
 :decl-pos&nbsp;//Position:Source&nbsp;location&nbsp;of&nbsp;this&nbsp;symbol's&nbsp;declaration.
 :is-callable&nbsp;//Bool:Is&nbsp;this&nbsp;symbol&nbsp;a&nbsp;method&nbsp;or&nbsp;function?
