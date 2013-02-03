@@ -33,6 +33,8 @@ import org.ensime.util.Profiling
 import org.ensime.config.ProjectConfig
 import org.ensime.indexer.Tokens
 import org.ensime.protocol.ProtocolConversions
+import org.neo4j.cypher.ExecutionEngine
+import org.neo4j.helpers.collection.IteratorUtil
 
 import org.objectweb.asm.ClassReader
 
@@ -359,9 +361,16 @@ class PIG(
                   point: Int,
                   names: List[String],
                   maxResults: Int) => {
-                  // let's execute a query now
-                  val engine = new ExecutionEngine(db);
-                  ExecutionResult result = engine.execute( "start n=node("+id+") return n, n.name" );
+                  // Let's execute a query now
+                  val engine = new ExecutionEngine(graphDb);
+                  val result = engine.execute(
+                    "START n=node:tpeIndex(\"nameTokens:class\") MATCH n-[:containedBy*1..5]->container WHERE container.nodeType=\"file\" RETURN n,container")
+                  val n_column = result.columnAs("n");
+                  for (node:Node <- n_column) {
+                    // note: we're grabbing the name property from the node,
+                    // not from the n.name in this case.
+                    println(node + ": " + node.getProperty( "name" ));
+                  }
                   //                  val suggestions = ImportSuggestions()
                   //                  project ! RPCResultEvent(toWF(suggestions), callId)
                 }
