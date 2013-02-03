@@ -65,14 +65,13 @@ object EnsimeBuild extends Build {
       id = "ensime",
       base = file ("."),
       settings = Project.defaultSettings ++
-        Seq(
-          version := "0.9.8.2",
-          organization := "org.ensime",
-          scalaVersion := TwoTenVersion,
-          crossScalaVersions := Seq(TwoNineVersion, TwoTenVersion),
-          resolvers <++= (scalaVersion) { scalaVersion =>
-            Seq(
-              "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
+      Seq(
+        version := "0.9.8.3",
+        organization := "org.ensime",
+        scalaVersion := TwoTenVersion,
+        crossScalaVersions := Seq(TwoNineVersion, TwoTenVersion),
+        resolvers <++= (scalaVersion) { scalaVersion =>
+          Seq("Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
               "Sonatype OSS Repository" at "https://oss.sonatype.org/service/local/staging/deploy/maven2",
               "Sonatype OSS Snapshot Repository" at "https://oss.sonatype.org/content/repositories/snapshots",
               "JBoss Maven 2 Repo" at "http://repository.jboss.org/maven2",
@@ -88,10 +87,9 @@ object EnsimeBuild extends Build {
               "asm" % "asm-commons" % "3.3",
               "asm" % "asm-util" % "3.3",
               "com.googlecode.json-simple" % "json-simple" % "1.1"
-            ) ++
-            (if (scalaVersion == TwoTenVersion)
-              Seq(
-                "org.scalariform" %% "scalariform" % "0.1.3" % "compile;runtime;test",
+      ) ++
+          (if (scalaVersion == TwoTenVersion)
+            Seq(
                 "org.scalatest" % "scalatest_2.10.0" % "1.8" % "test",
                 "org.scala-lang" % "scala-compiler" % scalaVersion % "compile;runtime;test",
                 "org.scala-lang" % "scala-reflect" % scalaVersion % "compile;runtime;test",
@@ -213,9 +211,14 @@ object EnsimeBuild extends Build {
           "./" + distDir + "/bin/server.bat")
       }
 
-      copyFile(root / "README.md", root / distDir / "README.md")
-      copyFile(root / "LICENSE", root / distDir / "LICENSE")
-    }
+    copyFile(root / "README.md", root / distDir / "README.md")
+    copyFile(root / "LICENSE", root / distDir / "LICENSE")
+
+    val distCommon = "dist"
+    delete(file(distCommon))
+    log.info("Symlinking to ./" + distCommon + "....")
+    doSh("ln -s  " + distDir + " " + distCommon)!!(log)
+  }
 
 
   var dist = TaskKey[Unit]("dist", "Create the release package.")
