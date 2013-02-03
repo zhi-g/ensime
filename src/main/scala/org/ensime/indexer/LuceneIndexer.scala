@@ -88,6 +88,33 @@ import scala.collection.mutable.{ HashMap, HashSet, ArrayBuffer, ListBuffer }
 import org.objectweb.asm.Opcodes;
 import org.json.simple._
 
+object Tokens {
+  def tokenizeCamelCaseName(nm:String): String = {
+    val tokens = new StringBuilder
+    tokens.append(nm.toLowerCase)
+    tokens.append(" ")
+    var i = 0
+    var k = 0
+    while (i < nm.length) {
+      val c: Char = nm.charAt(i)
+      if ((c == ' ' || c == '.') && i != k) {
+        tokens.append(nm.substring(k, i))
+        tokens.append(" ")
+        k = i + 1
+      } else if (Character.isUpperCase(c) && i != k) {
+        tokens.append(nm.substring(k, i))
+        tokens.append(" ")
+        k = i
+      }
+      i += 1
+    }
+    if (i != k) {
+      tokens.append(nm.substring(k))
+    }
+    tokens.toString
+  }
+}
+
 object LuceneIndex extends StringSimilarity {
   val KeyIndexVersion = "indexVersion"
   val KeyFileHashes = "fileHashes"
@@ -177,38 +204,15 @@ object LuceneIndex extends StringSimilarity {
       !(proposed -- onDisk.toList).isEmpty)
   }
 
-  def tokenize(nm: String): String = {
-    val tokens = new StringBuilder
-    tokens.append(nm.toLowerCase)
-    tokens.append(" ")
-    var i = 0
-    var k = 0
-    while (i < nm.length) {
-      val c: Char = nm.charAt(i)
-      if ((c == ' ' || c == '.') && i != k) {
-        tokens.append(nm.substring(k, i))
-        tokens.append(" ")
-        k = i + 1
-      } else if (Character.isUpperCase(c) && i != k) {
-        tokens.append(nm.substring(k, i))
-        tokens.append(" ")
-        k = i
-      }
-      i += 1
-    }
-    if (i != k) {
-      tokens.append(nm.substring(k))
-    }
-    tokens.toString
-  }
-
   private def buildDoc(value: SymbolSearchResult): Document = {
     val doc = new Document()
 
     doc.add(new Field("tags",
-      tokenize(value.name), Field.Store.NO, Field.Index.ANALYZED))
+      Tokens.tokenizeCamelCaseName(value.name),
+      Field.Store.NO, Field.Index.ANALYZED))
     doc.add(new Field("localNameTags",
-      tokenize(value.localName), Field.Store.NO, Field.Index.ANALYZED))
+      Tokens.tokenizeCamelCaseName(value.localName),
+      Field.Store.NO, Field.Index.ANALYZED))
 
     doc.add(new Field("name",
       value.name, Field.Store.YES, Field.Index.NOT_ANALYZED))

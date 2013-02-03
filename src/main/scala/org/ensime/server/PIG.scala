@@ -31,8 +31,7 @@ import java.io.File
 import org.ensime.util.FileUtils
 import org.ensime.util.Profiling
 import org.ensime.config.ProjectConfig
-import org.ensime.indexer.ClassFileIndex
-import org.ensime.indexer.LuceneIndex
+import org.ensime.indexer.Tokens
 import org.ensime.protocol.ProtocolConversions
 
 import org.objectweb.asm.ClassReader
@@ -43,6 +42,8 @@ import org.neo4j.graphdb.Node
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
 import org.neo4j.graphdb.index.Index
 import org.neo4j.graphdb.index.IndexHits
+import org.neo4j.graphdb.index.IndexManager
+import org.neo4j.helpers.collection.MapUtil
 import scala.collection.immutable.Vector
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable.ArrayStack
@@ -70,6 +71,7 @@ class RoundRobin[T](items: IndexedSeq[T]) {
 trait PIGIndex {
 
   val PropName = "name"
+  val PropNameTokens = "nameTokens"
   val PropPath = "path"
   val PropNodeType = "nodeType"
 
@@ -93,6 +95,17 @@ trait PIGIndex {
   protected def graphDb: GraphDatabaseService
   protected def fileIndex : Index[Node]
   protected def tpeIndex : Index[Node]
+
+  protected def createDefaultGraphDb =
+    (new GraphDatabaseFactory()).newEmbeddedDatabase("neo4j-db")
+
+  protected def createDefaultFileIndex(db: GraphDatabaseService) =
+    db.index().forNodes("fileIndex")
+
+  protected def createDefaultTypeIndex(db: GraphDatabaseService) =
+    db.index().forNodes("tpeIndex",
+      MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext" )
+    )
 
   protected def shutdown = { graphDb.shutdown }
 
@@ -139,13 +152,12 @@ trait PIGIndex {
     import scala.tools.nsc.util.RangePosition
     class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
 
+
       override def traverse(t: Tree) {
 
         val fileNode = findFileNode(db, f)
         val stack = new ArrayStack[Node]
         stack.push(fileNode)
-
-        //tpeIndex.add(tpe, "typeName", tpeName)
 
         val treeP = t.pos
         if (!treeP.isTransparent) {
@@ -155,7 +167,7 @@ trait PIGIndex {
               case PackageDef(pid, stats) => {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypePackage)
-                node.createRelationshipTo(fileNode, RelInFile)
+                node.createRelationshipTo(stack.top, RelContainedBy)
                 stack.push(node)
                 super.traverse(t)
                 stack.pop()
@@ -171,22 +183,28 @@ trait PIGIndex {
               }
 
               case ClassDef(mods, name, tparams, impl) => {
+                val localName = name.decode
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
-                node.setProperty(PropName, name.decode)
-                node.createRelationshipTo(fileNode, RelInFile)
+                node.setProperty(PropName, localName)
                 node.createRelationshipTo(stack.top, RelContainedBy)
+//                tpeIndex.putIfAbsent(node, PropName, localName)
+                tpeIndex.add(
+                  node, PropNameTokens, Tokens.tokenizeCamelCaseName(localName))
                 stack.push(node)
                 super.traverse(t)
                 stack.pop()
               }
 
               case ModuleDef(mods, name, impl) => {
+                val localName = name.decode
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
-                node.createRelationshipTo(fileNode, RelInFile)
                 node.createRelationshipTo(stack.top, RelContainedBy)
+//                tpeIndex.putIfAbsent(node, PropName, localName)
+                tpeIndex.add(
+                  node, PropNameTokens, Tokens.tokenizeCamelCaseName(localName))
                 stack.push(node)
                 super.traverse(t)
                 stack.pop()
@@ -196,7 +214,6 @@ trait PIGIndex {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
-                node.createRelationshipTo(fileNode, RelInFile)
                 node.createRelationshipTo(stack.top, RelContainedBy)
                 val isField =
                   stack.top.getProperty(PropNodeType) == NodeTypeType
@@ -221,7 +238,6 @@ trait PIGIndex {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeMethod)
                 node.setProperty(PropName, name.decode)
-                node.createRelationshipTo(fileNode, RelInFile)
                 node.createRelationshipTo(stack.top, RelContainedBy)
                 stack.push(node)
                 super.traverse(t)
@@ -317,15 +333,16 @@ class PIG(
   import org.ensime.protocol.ProtocolConst._
   import protocol._
 
+
   var graphDb: GraphDatabaseService = null
   var fileIndex: Index[Node] = null
   var tpeIndex: Index[Node] = null
 
   def act() {
     val factory = new GraphDatabaseFactory()
-    graphDb = factory.newEmbeddedDatabase("neoj4-db")
-    fileIndex = graphDb.index().forNodes("fileIndex")
-    tpeIndex = graphDb.index().forNodes("tpeIndex")
+    graphDb = createDefaultGraphDb
+    fileIndex = createDefaultFileIndex(graphDb)
+    tpeIndex = createDefaultTypeIndex(graphDb)
     indexDirectories(config.sourceRoots)
     loop {
       try {
@@ -342,6 +359,9 @@ class PIG(
                   point: Int,
                   names: List[String],
                   maxResults: Int) => {
+                  // let's execute a query now
+                  val engine = new ExecutionEngine(db);
+                  ExecutionResult result = engine.execute( "start n=node("+id+") return n, n.name" );
                   //                  val suggestions = ImportSuggestions()
                   //                  project ! RPCResultEvent(toWF(suggestions), callId)
                 }
@@ -385,16 +405,13 @@ class PIG(
 }
 
 object PIG extends PIGIndex {
-  var graphDb: GraphDatabaseService = null
-  var fileIndex: Index[Node] = null
-  var tpeIndex: Index[Node] = null
+  var graphDb: GraphDatabaseService = createDefaultGraphDb
+  var fileIndex: Index[Node] = createDefaultFileIndex(graphDb)
+  var tpeIndex: Index[Node] = createDefaultTypeIndex(graphDb)
 
   def main(args: Array[String]) {
     System.setProperty("actors.corePoolSize", "10")
     System.setProperty("actors.maxPoolSize", "100")
-    graphDb = (new GraphDatabaseFactory()).newEmbeddedDatabase("neo4j-db")
-    fileIndex = graphDb.index().forNodes("fileIndex")
-    tpeIndex = graphDb.index().forNodes("tpeIndex")
     Profiling.time {
       indexDirectories(args.map(new File(_)))
     }
