@@ -89,6 +89,25 @@ import org.objectweb.asm.Opcodes;
 import org.json.simple._
 
 object Tokens {
+
+  def splitTypeName(nm: String): List[String] = {
+    val keywords = new ListBuffer[String]()
+    var i = 0
+    var k = 0
+    while (i < nm.length) {
+      val c: Char = nm.charAt(i)
+      if (Character.isUpperCase(c) && i != k) {
+        keywords += nm.substring(k, i)
+        k = i
+      }
+      i += 1
+    }
+    if (i != k) {
+      keywords += nm.substring(k)
+    }
+    keywords.toList
+  }
+
   def tokenizeCamelCaseName(nm:String): String = {
     val tokens = new StringBuilder
     tokens.append(nm.toLowerCase)
@@ -127,23 +146,6 @@ object LuceneIndex extends StringSimilarity {
     }
   }
 
-  def splitTypeName(nm: String): List[String] = {
-    val keywords = new ListBuffer[String]()
-    var i = 0
-    var k = 0
-    while (i < nm.length) {
-      val c: Char = nm.charAt(i)
-      if (Character.isUpperCase(c) && i != k) {
-        keywords += nm.substring(k, i)
-        k = i
-      }
-      i += 1
-    }
-    if (i != k) {
-      keywords += nm.substring(k)
-    }
-    keywords.toList
-  }
 
   private val cache = new HashMap[(String, String), Int]
   def editDist(a: String, b: String): Int = {
@@ -461,7 +463,7 @@ trait LuceneIndex {
   def getImportSuggestions(typeNames: Iterable[String],
     maxResults: Int = 0): List[List[SymbolSearchResult]] = {
     def suggestions(typeName: String): List[SymbolSearchResult] = {
-      val keywords = typeName::splitTypeName(typeName)
+      val keywords = typeName::Tokens.splitTypeName(typeName)
       val candidates = new HashSet[SymbolSearchResult]
 
       search(keywords,
@@ -509,23 +511,6 @@ trait LuceneIndex {
     }
   }
 
-  private def splitTypeName(nm: String): List[String] = {
-    val keywords = new ListBuffer[String]()
-    var i = 0
-    var k = 0
-    while (i < nm.length) {
-      val c: Char = nm.charAt(i)
-      if (Character.isUpperCase(c) && i != k) {
-        keywords += nm.substring(k, i)
-        k = i
-      }
-      i += 1
-    }
-    if (i != k) {
-      keywords += nm.substring(k)
-    }
-    keywords.toList
-  }
 
   def search(
     keys: Iterable[String],
@@ -600,18 +585,13 @@ object IndexTest extends LuceneIndex {
     val classpath = "/Users/aemon/projects/ensime/target/scala-2.9.2/classes:/Users/aemon/projects/ensime/lib/org.scala-refactoring_2.9.2-SNAPSHOT-0.5.0-SNAPSHOT.jar"
     val files = classpath.split(":").map { new File(_) }.toSet
     initialize(new File("."), files, List(), List())
-
-    import java.util.Scanner
-    val in = new Scanner(System.in)
-    var line = in.nextLine()
-    while (!line.isEmpty) {
+    Util.foreachInputLine { line =>
       val keys = line.split(" ")
       for (l <- getImportSuggestions(keys, 20)) {
         for (s <- l) {
           println(s.name)
         }
       }
-      line = in.nextLine()
     }
   }
 }

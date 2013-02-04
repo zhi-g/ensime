@@ -28,8 +28,13 @@
 package org.ensime.server
 
 import java.io.File
+import org.ensime.model.ImportSuggestions
+import org.ensime.model.SymbolSearchResult
+import org.ensime.model.TypeSearchResult
 import org.ensime.util.FileUtils
+import org.ensime.util.StringSimilarity
 import org.ensime.util.Profiling
+import org.ensime.util.Util
 import org.ensime.config.ProjectConfig
 import org.ensime.indexer.Tokens
 import org.ensime.protocol.ProtocolConversions
@@ -46,9 +51,12 @@ import org.neo4j.graphdb.index.Index
 import org.neo4j.graphdb.index.IndexHits
 import org.neo4j.graphdb.index.IndexManager
 import org.neo4j.helpers.collection.MapUtil
+import scala.collection.JavaConversions
 import scala.collection.immutable.Vector
 import scala.collection.immutable.IndexedSeq
 import scala.collection.mutable.ArrayStack
+import scala.collection.mutable.HashMap
+import scala.collection.Iterable
 
 import scala.tools.nsc.interactive.{ CompilerControl, Global }
 import scala.tools.nsc.util.{ SourceFile, BatchSourceFile }
@@ -70,12 +78,36 @@ class RoundRobin[T](items: IndexedSeq[T]) {
   def foreach(action: T => Unit) = items.foreach(action)
 }
 
-trait PIGIndex {
+trait PIGIndex extends StringSimilarity {
+
+  private val cache = new HashMap[(String, String), Int]
+  def editDist(a: String, b: String): Int = {
+    cache.getOrElseUpdate((a, b), getLevenshteinDistance(a, b))
+  }
 
   val PropName = "name"
   val PropNameTokens = "nameTokens"
   val PropPath = "path"
   val PropNodeType = "nodeType"
+  val PropOffset = "offset"
+  val PropDeclaredAs = "declaredAs"
+
+  case class TypeNode(node: Node) {
+    def name = node.getProperty(PropName).asInstanceOf[String]
+    def localName = node.getProperty(PropName).asInstanceOf[String]
+    def offset = node.getProperty(PropOffset).asInstanceOf[Integer]
+    def declaredAs =
+      scala.Symbol(node.getProperty(PropDeclaredAs).asInstanceOf[String])
+  }
+  type TpeNode = TypeNode
+
+  case class FileNode(node: Node) {
+    def path = node.getProperty(PropPath).asInstanceOf[String]
+  }
+
+  case class PackageNode(node: Node) {
+    def path = node.getProperty(PropPath).asInstanceOf[String]
+  }
 
   val NodeTypeFile = "file"
   val NodeTypePackage = "package"
@@ -130,17 +162,48 @@ trait PIGIndex {
     }
   }
 
+  def findTypeSuggestions(
+    typeName:String, maxResults: Int): Iterable[TypeSearchResult] = {
+    val keys = Tokens.splitTypeName(typeName).
+      filter(!_.isEmpty).map(_.toLowerCase)
+    val luceneQuery = keys.map("nameTokens:" + _).mkString(" OR ")
+    val query = s"""START n=node:tpeIndex('$luceneQuery')
+                    MATCH n-[:containedBy*1..5]->x, n-[:containedBy*1..5]->y
+                    WHERE x.nodeType='file' and y.nodeType='package'
+                    RETURN n,x,y LIMIT $maxResults"""
+    val engine = new ExecutionEngine(graphDb);
+    val result = engine.execute(query)
+    val candidates = result.flatMap { row =>
+      (row.get("n"), row.get("x"), row.get("y")) match {
+        case (Some(tpeNode:Node), Some(fileNode:Node), Some(packNode:Node)) => {
+          val tpe = TypeNode(tpeNode)
+          val file = FileNode(fileNode)
+          val pack = PackageNode(packNode)
+          Some(TypeSearchResult(
+            pack.path + "." + tpe.name, tpe.localName, tpe.declaredAs,
+            Some((file.path, tpe.offset))))
+        }
+        case _ => None
+      }
+    }.toIterable
+
+    // Sort by edit distance of type name primarily, and
+    // length of full name secondarily.
+    candidates.toList.sortWith { (a, b) =>
+      val d1 = editDist(a.localName, typeName)
+      val d2 = editDist(b.localName, typeName)
+      if (d1 == d2) a.name.length < b.name.length
+      else d1 < d2
+    }
+  }
+
   private def findFileNode(db: GraphDatabaseService, f: File): Node = {
-    import scala.collection.JavaConversions
     val fileNode = JavaConversions.iterableAsScalaIterable(
       fileIndex.get("path", f.getAbsolutePath)).headOption
     fileNode match {
       case Some(node) => node
       case None => {
         val node = db.createNode()
-        val refNode = db.getReferenceNode
-        node.createRelationshipTo(refNode, RelFileOf)
-        println("reference ref node form: " + f)
         node.setProperty(PropPath, f.getAbsolutePath)
         node.setProperty(PropNodeType, NodeTypeFile)
         fileIndex.putIfAbsent(node, "path", f.getAbsolutePath)
@@ -154,13 +217,11 @@ trait PIGIndex {
     import scala.tools.nsc.util.RangePosition
     class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
 
+      val fileNode = findFileNode(db, f)
+      val stack = new ArrayStack[Node]
+      stack.push(fileNode)
 
       override def traverse(t: Tree) {
-
-        val fileNode = findFileNode(db, f)
-        val stack = new ArrayStack[Node]
-        stack.push(fileNode)
-
         val treeP = t.pos
         if (!treeP.isTransparent) {
           try {
@@ -169,6 +230,8 @@ trait PIGIndex {
               case PackageDef(pid, stats) => {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypePackage)
+                node.setProperty(PropPath,
+                  pid.qualifier.toString + "." + pid.name.decode)
                 node.createRelationshipTo(stack.top, RelContainedBy)
                 stack.push(node)
                 super.traverse(t)
@@ -189,8 +252,12 @@ trait PIGIndex {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, localName)
+                node.setProperty(PropDeclaredAs,
+                  if (mods.isTrait) "trait"
+                  else if (mods.isInterface) "interface"
+                  else "class")
+                node.setProperty(PropOffset, treeP.startOrPoint)
                 node.createRelationshipTo(stack.top, RelContainedBy)
-//                tpeIndex.putIfAbsent(node, PropName, localName)
                 tpeIndex.add(
                   node, PropNameTokens, Tokens.tokenizeCamelCaseName(localName))
                 stack.push(node)
@@ -203,8 +270,10 @@ trait PIGIndex {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
+                node.setProperty(PropDeclaredAs, "object")
+                node.setProperty(PropOffset, treeP.startOrPoint)
                 node.createRelationshipTo(stack.top, RelContainedBy)
-//                tpeIndex.putIfAbsent(node, PropName, localName)
+                // tpeIndex.putIfAbsent(node, PropName, localName)
                 tpeIndex.add(
                   node, PropNameTokens, Tokens.tokenizeCamelCaseName(localName))
                 stack.push(node)
@@ -361,18 +430,9 @@ class PIG(
                   point: Int,
                   names: List[String],
                   maxResults: Int) => {
-                  // Let's execute a query now
-                  val engine = new ExecutionEngine(graphDb);
-                  val result = engine.execute(
-                    "START n=node:tpeIndex(\"nameTokens:class\") MATCH n-[:containedBy*1..5]->container WHERE container.nodeType=\"file\" RETURN n,container")
-                  val n_column = result.columnAs("n");
-                  for (node:Node <- n_column) {
-                    // note: we're grabbing the name property from the node,
-                    // not from the n.name in this case.
-                    println(node + ": " + node.getProperty( "name" ));
-                  }
-                  //                  val suggestions = ImportSuggestions()
-                  //                  project ! RPCResultEvent(toWF(suggestions), callId)
+                  val suggestions = ImportSuggestions(
+                    names.map(findTypeSuggestions(_, maxResults)))
+                  project ! RPCResultEvent(toWF(suggestions), callId)
                 }
                 case PublicSymbolSearchReq(
                   keywords: List[String],
@@ -423,6 +483,13 @@ object PIG extends PIGIndex {
     System.setProperty("actors.maxPoolSize", "100")
     Profiling.time {
       indexDirectories(args.map(new File(_)))
+    }
+
+    Util.foreachInputLine { line =>
+      val name = line
+      for (l <- findTypeSuggestions(name, 20)) {
+        println(l.name)
+      }
     }
     graphDb.shutdown()
   }

@@ -81,8 +81,8 @@ object EnsimeBuild extends Build {
           libraryDependencies <++= (scalaVersion) { scalaVersion =>
             Seq(
               "org.apache.lucene" % "lucene-core" % "3.5.0",
-              "org.neo4j" % "neo4j-lucene-index" % "1.8" exclude("org.neo4j", "neo4j-udc"),
-              "org.neo4j" % "neo4j-cypher" % "1.8",
+              "org.neo4j" % "neo4j-lucene-index" % "1.9.M04" exclude("org.neo4j", "neo4j-udc"),
+              "org.neo4j" % "neo4j-cypher" % "1.9.M04",
               "org.sonatype.tycho" % "org.eclipse.jdt.core" % "3.6.0.v_A58" % "compile;runtime;test",
               "asm" % "asm" % "3.3",
               "asm" % "asm-commons" % "3.3",
