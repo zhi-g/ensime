@@ -171,7 +171,7 @@ trait PIGIndex extends StringSimilarity {
                     MATCH n-[:containedBy*1..5]->x, n-[:containedBy*1..5]->y
                     WHERE x.nodeType='file' and y.nodeType='package'
                     RETURN n,x,y LIMIT $maxResults"""
-    val engine = new ExecutionEngine(graphDb);
+    val engine = new ExecutionEngine(graphDb)
     val result = engine.execute(query)
     val candidates = result.flatMap { row =>
       (row.get("n"), row.get("x"), row.get("y")) match {
@@ -215,12 +215,17 @@ trait PIGIndex extends StringSimilarity {
   trait Extensions { self: Global =>
     import scala.tools.nsc.symtab.Flags._
     import scala.tools.nsc.util.RangePosition
-    class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
 
+    // See mads379's 8480b638c785c504e09b4fb829acdb24117af0c2
+    def quickParse(source: SourceFile): Tree = {
+      import syntaxAnalyzer.UnitParser
+      new UnitParser(new CompilationUnit(source)).parse()
+    }
+
+    class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
       val fileNode = findFileNode(db, f)
       val stack = new ArrayStack[Node]
       stack.push(fileNode)
-
       override def traverse(t: Tree) {
         val treeP = t.pos
         if (!treeP.isTransparent) {
@@ -334,17 +339,15 @@ trait PIGIndex extends StringSimilarity {
       }
     }
   }
-
   case class Die()
   case class ParseFile(f:File)
-
   class Worker(compiler:Global with Extensions) extends Actor {
     def act() {
       loop {
         receive {
-          case ParseFile(f:File) => {
+          case ParseFile(f: File) => {
             val sf = compiler.getSourceFile(f.getAbsolutePath())
-            val tree = compiler.parseTree(sf)
+            val tree = compiler.quickParse(sf)
             println("parsed " + f)
             doTx { db =>
               val traverser = new compiler.TreeTraverser(f, db)
@@ -488,7 +491,7 @@ object PIG extends PIGIndex {
     Util.foreachInputLine { line =>
       val name = line
       for (l <- findTypeSuggestions(name, 20)) {
-        println(l.name)
+        println(l)
       }
     }
     graphDb.shutdown()
