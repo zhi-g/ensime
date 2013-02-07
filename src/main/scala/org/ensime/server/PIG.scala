@@ -28,45 +28,26 @@
 package org.ensime.server
 
 import java.io.File
-import org.ensime.model.ImportSuggestions
-import org.ensime.model.SymbolSearchResult
-import org.ensime.model.TypeSearchResult
-import org.ensime.util.FileUtils
-import org.ensime.util.StringSimilarity
-import org.ensime.util.Profiling
-import org.ensime.util.Util
 import org.ensime.config.ProjectConfig
 import org.ensime.indexer.Tokens
+import org.ensime.model.ImportSuggestions
+import org.ensime.model.TypeSearchResult
 import org.ensime.protocol.ProtocolConversions
+import org.ensime.util.{FileUtils, Profiling, StringSimilarity, Util}
 import org.neo4j.cypher.ExecutionEngine
-import org.neo4j.helpers.collection.IteratorUtil
-
-import org.objectweb.asm.ClassReader
-
-import org.neo4j.graphdb.DynamicRelationshipType
-import org.neo4j.graphdb.GraphDatabaseService
-import org.neo4j.graphdb.Node
+import org.neo4j.graphdb.{DynamicRelationshipType, GraphDatabaseService, Node}
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
-import org.neo4j.graphdb.index.Index
-import org.neo4j.graphdb.index.IndexHits
-import org.neo4j.graphdb.index.IndexManager
+import org.neo4j.graphdb.index.{Index, IndexHits, IndexManager}
 import org.neo4j.helpers.collection.MapUtil
-import scala.collection.JavaConversions
-import scala.collection.immutable.Vector
-import scala.collection.immutable.IndexedSeq
-import scala.collection.mutable.ArrayStack
-import scala.collection.mutable.HashMap
-import scala.collection.Iterable
-
-import scala.tools.nsc.interactive.{ CompilerControl, Global }
-import scala.tools.nsc.util.{ SourceFile, BatchSourceFile }
-import scala.tools.nsc.Settings
-import scala.tools.nsc.reporters.{Reporter, StoreReporter}
-import java.util.concurrent.{Executors, ExecutorService}
-
-
 import scala.actors._
 import scala.actors.Actor._
+import scala.collection.{Iterable, JavaConversions}
+import scala.collection.immutable.IndexedSeq
+import scala.collection.mutable.{ArrayStack, HashMap, HashSet}
+import scala.tools.nsc.Settings
+import scala.tools.nsc.interactive.{CompilerControl, Global}
+import scala.tools.nsc.reporters.{Reporter, StoreReporter}
+import scala.tools.nsc.util.SourceFile
 
 class RoundRobin[T](items: IndexedSeq[T]) {
   var i = 0
@@ -129,6 +110,7 @@ trait PIGIndex extends StringSimilarity {
   protected def graphDb: GraphDatabaseService
   protected def fileIndex : Index[Node]
   protected def tpeIndex : Index[Node]
+  protected def scopeIndex : Index[Node]
 
   protected def createDefaultGraphDb =
     (new GraphDatabaseFactory()).newEmbeddedDatabase("neo4j-db")
@@ -138,8 +120,11 @@ trait PIGIndex extends StringSimilarity {
 
   protected def createDefaultTypeIndex(db: GraphDatabaseService) =
     db.index().forNodes("tpeIndex",
-      MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext" )
-    )
+      MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext" ))
+
+  protected def createDefaultScopeIndex(db: GraphDatabaseService) =
+    db.index().forNodes("scopeIndex",
+      MapUtil.stringMap( IndexManager.PROVIDER, "lucene", "type", "fulltext" ))
 
   protected def shutdown = { graphDb.shutdown }
 
@@ -224,8 +209,25 @@ trait PIGIndex extends StringSimilarity {
 
     class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
       val fileNode = findFileNode(db, f)
-      val stack = new ArrayStack[Node]
+
+      // A stack of nodes corresponding to the syntactic nesting as we traverse
+      // the AST.
+      val stack = ArrayStack[Node]()
       stack.push(fileNode)
+
+      // A stack of token blobs, to be indexed with the corresponding node.
+      val tokenStack = ArrayStack[HashSet[String]]()
+      tokenStack.push(HashSet[String]())
+
+      def descendWithContext(t: Tree, containingNode: Node) {
+        tokenStack.push(HashSet[String]())
+        stack.push(containingNode)
+        super.traverse(t)
+        stack.pop()
+        val tokens = tokenStack.pop()
+        scopeIndex.add(containingNode, PropNameTokens, tokens.mkString(" "))
+      }
+
       override def traverse(t: Tree) {
         val treeP = t.pos
         if (!treeP.isTransparent) {
@@ -235,19 +237,20 @@ trait PIGIndex extends StringSimilarity {
               case PackageDef(pid, stats) => {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypePackage)
-                node.setProperty(PropPath,
-                  pid.qualifier.toString + "." + pid.name.decode)
+                val fullName = pid.qualifier.toString + "." + pid.name.decode
+                node.setProperty(PropPath, fullName)
+                tokenStack.top += fullName.toLowerCase
                 node.createRelationshipTo(stack.top, RelContainedBy)
-                stack.push(node)
-                super.traverse(t)
-                stack.pop()
+                descendWithContext(t, node)
               }
 
               case Import(expr, selectors) => {
                 for (impSel <- selectors) {
                   val node = db.createNode()
                   node.setProperty(PropNodeType, NodeTypeImport)
-                  node.setProperty(PropName, impSel.name.decode)
+                  val importedName = impSel.name.decode
+                  node.setProperty(PropName, importedName)
+                  tokenStack.top + importedName
                   node.createRelationshipTo(stack.top, RelContainedBy)
                 }
               }
@@ -265,9 +268,8 @@ trait PIGIndex extends StringSimilarity {
                 node.createRelationshipTo(stack.top, RelContainedBy)
                 tpeIndex.add(
                   node, PropNameTokens, Tokens.tokenizeCamelCaseName(localName))
-                stack.push(node)
-                super.traverse(t)
-                stack.pop()
+                tokenStack.top += localName
+                descendWithContext(t, node)
               }
 
               case ModuleDef(mods, name, impl) => {
@@ -278,12 +280,10 @@ trait PIGIndex extends StringSimilarity {
                 node.setProperty(PropDeclaredAs, "object")
                 node.setProperty(PropOffset, treeP.startOrPoint)
                 node.createRelationshipTo(stack.top, RelContainedBy)
-                // tpeIndex.putIfAbsent(node, PropName, localName)
                 tpeIndex.add(
                   node, PropNameTokens, Tokens.tokenizeCamelCaseName(localName))
-                stack.push(node)
-                super.traverse(t)
-                stack.pop()
+                tokenStack.top += localName
+                descendWithContext(t, node)
               }
 
               case ValDef(mods, name, tpt, rhs) => {
@@ -291,6 +291,7 @@ trait PIGIndex extends StringSimilarity {
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
                 node.createRelationshipTo(stack.top, RelContainedBy)
+                tokenStack.top += name.decode
                 val isField =
                   stack.top.getProperty(PropNodeType) == NodeTypeType
                 if (mods.hasFlag(PARAM)) {
@@ -305,9 +306,7 @@ trait PIGIndex extends StringSimilarity {
                 } else if (isField) {
                   node.setProperty(PropNodeType, NodeTypeValField)
                 }
-                //stack.push(node)
-                //super.traverse(t)
-                //stack.pop()
+                descendWithContext(t, node)
               }
 
               case DefDef(mods, name, tparams, vparamss, tpt, rhs) => {
@@ -315,15 +314,23 @@ trait PIGIndex extends StringSimilarity {
                 node.setProperty(PropNodeType, NodeTypeMethod)
                 node.setProperty(PropName, name.decode)
                 node.createRelationshipTo(stack.top, RelContainedBy)
-                stack.push(node)
-                super.traverse(t)
-                stack.pop()
+                descendWithContext(t, node)
               }
 
               case TypeDef(mods, name, tparams, rhs) => {
+                tokenStack.top += name.decode
+                super.traverse(t)
               }
 
-              case LabelDef(name, params, rhs) => {
+              case LabelDef(name, params, rhs) => {}
+
+              case Ident(name) => {
+                tokenStack.top += name.decode
+              }
+
+              case Select(qual, selector: Name) => {
+                tokenStack.top += selector.decode
+                super.traverse(t)
               }
 
               case _ => { super.traverse(t) }
@@ -411,12 +418,14 @@ class PIG(
   var graphDb: GraphDatabaseService = null
   var fileIndex: Index[Node] = null
   var tpeIndex: Index[Node] = null
+  var scopeIndex: Index[Node] = null
 
   def act() {
     val factory = new GraphDatabaseFactory()
     graphDb = createDefaultGraphDb
     fileIndex = createDefaultFileIndex(graphDb)
     tpeIndex = createDefaultTypeIndex(graphDb)
+    scopeIndex = createDefaultScopeIndex(graphDb)
     indexDirectories(config.sourceRoots)
     loop {
       try {
@@ -480,6 +489,7 @@ object PIG extends PIGIndex {
   var graphDb: GraphDatabaseService = createDefaultGraphDb
   var fileIndex: Index[Node] = createDefaultFileIndex(graphDb)
   var tpeIndex: Index[Node] = createDefaultTypeIndex(graphDb)
+  var scopeIndex: Index[Node] = createDefaultScopeIndex(graphDb)
 
   def main(args: Array[String]) {
     System.setProperty("actors.corePoolSize", "10")
@@ -487,7 +497,6 @@ object PIG extends PIGIndex {
     Profiling.time {
       indexDirectories(args.map(new File(_)))
     }
-
     Util.foreachInputLine { line =>
       val name = line
       for (l <- findTypeSuggestions(name, 20)) {
