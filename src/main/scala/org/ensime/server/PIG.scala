@@ -243,9 +243,10 @@ trait PIGIndex extends StringSimilarity {
 
   private def purgeFileContents(tx: DbInTransaction, fileNode: Node) = {
     val path = fileNode.getProperty(PropPath)
-    executeQuery(tx.db, s"""START n=node:fileIndex($PropPath=$path)
-                    MATCH n-[:containedBy*1..5]->x
-                    DELETE n""")
+    executeQuery(tx.db,
+      s"""START n=node:fileIndex($PropPath=$path)
+       MATCH n-[:containedBy*1..5]->x
+       DELETE n""")
   }
 
   private def refreshFileNodeContents(
