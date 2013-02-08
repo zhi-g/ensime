@@ -37,6 +37,8 @@ import org.ensime.model.TypeSearchResult
 import org.ensime.protocol.ProtocolConversions
 import org.ensime.util.{FileUtils, Profiling, StringSimilarity, Util}
 import org.neo4j.cypher.ExecutionEngine
+import org.neo4j.cypher.ExecutionResult
+import org.neo4j.graphdb.Transaction
 import org.neo4j.graphdb.{DynamicRelationshipType, GraphDatabaseService, Node}
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
 import org.neo4j.graphdb.index.{Index, IndexHits, IndexManager}
@@ -71,6 +73,7 @@ trait PIGIndex extends StringSimilarity {
   val PropName = "name"
   val PropNameTokens = "nameTokens"
   val PropPath = "path"
+  val PropMd5 = "md5"
   val PropNodeType = "nodeType"
   val PropOffset = "offset"
   val PropDeclaredAs = "declaredAs"
@@ -94,6 +97,8 @@ trait PIGIndex extends StringSimilarity {
     def path = node.getProperty(PropPath).asInstanceOf[String]
   }
 
+  case class DbInTransaction(
+    db: GraphDatabaseService, transaction: Transaction) {}
 
 
   val NodeTypeFile = "file"
@@ -134,13 +139,13 @@ trait PIGIndex extends StringSimilarity {
 
   protected def shutdown = { graphDb.shutdown }
 
-  private def doTx(f: GraphDatabaseService => Unit) = {
-    val tx = graphDb.beginTx()
+  private def doTx(f: DbInTransaction => Unit): Unit = {
+    val tx = DbInTransaction(graphDb, graphDb.beginTx())
     try {
-      f(graphDb)
-      tx.success()
+      f(tx)
+      tx.transaction.success()
     } finally {
-      tx.finish()
+      tx.transaction.finish()
     }
   }
 
@@ -153,17 +158,22 @@ trait PIGIndex extends StringSimilarity {
     }
   }
 
-  def findTypeSuggestions(
+  private def executeQuery(
+      db: GraphDatabaseService, q: String): ExecutionResult = {
+    val engine = new ExecutionEngine(graphDb)
+    engine.execute(q)
+  }
+
+  // Find all types with names similar to typeName.
+  def findTypeSuggestions(db: GraphDatabaseService,
     typeName:String, maxResults: Int): Iterable[TypeSearchResult] = {
     val keys = Tokens.splitTypeName(typeName).
       filter(!_.isEmpty).map(_.toLowerCase)
     val luceneQuery = keys.map("nameTokens:" + _).mkString(" OR ")
-    val query = s"""START n=node:tpeIndex('$luceneQuery')
+    val result = executeQuery(db, s"""START n=node:tpeIndex('$luceneQuery')
                     MATCH n-[:containedBy*1..5]->x, n-[:containedBy*1..5]->y
                     WHERE x.nodeType='file' and y.nodeType='package'
-                    RETURN n,x,y LIMIT $maxResults"""
-    val engine = new ExecutionEngine(graphDb)
-    val result = engine.execute(query)
+                    RETURN n,x,y LIMIT $maxResults""")
     val candidates = result.flatMap { row =>
       (row.get("n"), row.get("x"), row.get("y")) match {
         case (Some(tpeNode:Node), Some(fileNode:Node), Some(packNode:Node)) => {
@@ -188,15 +198,14 @@ trait PIGIndex extends StringSimilarity {
     }
   }
 
-  def findOccurences(
+  // Find all occurances of a particular token.
+  def findOccurences(db: GraphDatabaseService,
       name:String, maxResults: Int): Iterable[IndexSearchResult] = {
     val luceneQuery = "nameTokens:" + name.toLowerCase
-    val query = s"""START n=node:scopeIndex('$luceneQuery')
+    val result = executeQuery(db, s"""START n=node:scopeIndex('$luceneQuery')
                     MATCH n-[:containedBy*1..5]->x
                     WHERE x.nodeType='file'
-                    RETURN n,x LIMIT $maxResults"""
-    val engine = new ExecutionEngine(graphDb)
-    val result = engine.execute(query)
+                    RETURN n,x LIMIT $maxResults""")
     result.flatMap { row =>
       (row.get("n"), row.get("x")) match {
         case (Some(symNode:Node), Some(fileNode:Node)) => {
@@ -211,22 +220,48 @@ trait PIGIndex extends StringSimilarity {
     }.toIterable
   }
 
-  private def findFileNode(db: GraphDatabaseService, f: File): Node = {
+  private def findFileNodeByMd5(
+      db: GraphDatabaseService, md5: String): Option[Node] = {
+    JavaConversions.iterableAsScalaIterable(
+      fileIndex.get(PropMd5, md5)).headOption
+  }
+
+  private def findOrCreateFileNode(tx: DbInTransaction, f: File): Node = {
     val fileNode = JavaConversions.iterableAsScalaIterable(
-      fileIndex.get("path", f.getAbsolutePath)).headOption
+      fileIndex.get(PropPath, f.getAbsolutePath)).headOption
     fileNode match {
       case Some(node) => node
       case None => {
-        val node = db.createNode()
+        val node = tx.db.createNode()
         node.setProperty(PropPath, f.getAbsolutePath)
         node.setProperty(PropNodeType, NodeTypeFile)
-        fileIndex.putIfAbsent(node, "path", f.getAbsolutePath)
+        fileIndex.putIfAbsent(node, PropPath, f.getAbsolutePath)
         node
       }
     }
   }
 
-  trait Extensions { self: Global =>
+  private def purgeFileContents(tx: DbInTransaction, fileNode: Node) = {
+    val path = fileNode.getProperty(PropPath)
+    executeQuery(tx.db, s"""START n=node:fileIndex($PropPath=$path)
+                    MATCH n-[:containedBy*1..5]->x
+                    DELETE n""")
+  }
+
+  private def refreshFileNodeContents(
+      tx: DbInTransaction, fileNode: Node, md5:String): Node = {
+    if (fileNode.hasProperty(PropMd5)) {
+      // File already existed.
+      fileIndex.remove(fileNode, PropMd5, fileNode.getProperty(PropMd5))
+      purgeFileContents(tx, fileNode)
+    }
+    fileNode.setProperty(PropMd5, md5)
+    fileIndex.add(fileNode, PropMd5, md5)
+    fileNode
+  }
+
+
+  trait CompilerExtensions { self: Global =>
     import scala.tools.nsc.symtab.Flags._
     import scala.tools.nsc.util.RangePosition
 
@@ -236,9 +271,8 @@ trait PIGIndex extends StringSimilarity {
       new UnitParser(new CompilationUnit(source)).parse()
     }
 
-    class TreeTraverser(f:File, db:GraphDatabaseService) extends Traverser {
-      val fileNode = findFileNode(db, f)
-
+    class TreeTraverser(fileNode: Node, tx: DbInTransaction)
+        extends Traverser {
       // A stack of nodes corresponding to the syntactic nesting as we traverse
       // the AST.
       val stack = ArrayStack[Node]()
@@ -264,7 +298,7 @@ trait PIGIndex extends StringSimilarity {
             t match {
 
               case PackageDef(pid, stats) => {
-                val node = db.createNode()
+                val node = tx.db.createNode()
                 node.setProperty(PropNodeType, NodeTypePackage)
                 val fullName = pid.qualifier.toString + "." + pid.name.decode
                 node.setProperty(PropPath, fullName)
@@ -276,7 +310,7 @@ trait PIGIndex extends StringSimilarity {
 
               case Import(expr, selectors) => {
                 for (impSel <- selectors) {
-                  val node = db.createNode()
+                  val node = tx.db.createNode()
                   node.setProperty(PropNodeType, NodeTypeImport)
                   val importedName = impSel.name.decode
                   node.setProperty(PropName, importedName)
@@ -288,7 +322,7 @@ trait PIGIndex extends StringSimilarity {
 
               case ClassDef(mods, name, tparams, impl) => {
                 val localName = name.decode
-                val node = db.createNode()
+                val node = tx.db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, localName)
                 node.setProperty(PropDeclaredAs,
@@ -305,7 +339,7 @@ trait PIGIndex extends StringSimilarity {
 
               case ModuleDef(mods, name, impl) => {
                 val localName = name.decode
-                val node = db.createNode()
+                val node = tx.db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
                 node.setProperty(PropDeclaredAs, "object")
@@ -318,7 +352,7 @@ trait PIGIndex extends StringSimilarity {
               }
 
               case ValDef(mods, name, tpt, rhs) => {
-                val node = db.createNode()
+                val node = tx.db.createNode()
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
                 node.createRelationshipTo(stack.top, RelContainedBy)
@@ -342,7 +376,7 @@ trait PIGIndex extends StringSimilarity {
               }
 
               case DefDef(mods, name, tparams, vparamss, tpt, rhs) => {
-                val node = db.createNode()
+                val node = tx.db.createNode()
                 node.setProperty(PropNodeType, NodeTypeMethod)
                 node.setProperty(PropName, name.decode)
                 node.setProperty(PropOffset, treeP.startOrPoint)
@@ -379,18 +413,21 @@ trait PIGIndex extends StringSimilarity {
       }
     }
   }
+
   case class Die()
-  case class ParseFile(f:File)
-  class Worker(compiler:Global with Extensions) extends Actor {
+  case class ParseFile(f: File, md5: String)
+  class Worker(compiler:Global with CompilerExtensions) extends Actor {
     def act() {
       loop {
         receive {
-          case ParseFile(f: File) => {
-            val sf = compiler.getSourceFile(f.getAbsolutePath())
-            val tree = compiler.quickParse(sf)
-            println("parsed " + f)
-            doTx { db =>
-              val traverser = new compiler.TreeTraverser(f, db)
+          case ParseFile(f: File, md5: String) => {
+            doTx { tx =>
+              val fileNode = findOrCreateFileNode(tx, f)
+              refreshFileNodeContents(tx, fileNode, md5)
+              val sf = compiler.getSourceFile(f.getAbsolutePath())
+              val tree = compiler.quickParse(sf)
+              println("parsed " + f)
+              val traverser = new compiler.TreeTraverser(fileNode, tx)
               traverser.traverse(tree)
             }
             reply(f)
@@ -406,12 +443,12 @@ trait PIGIndex extends StringSimilarity {
     val MaxWorkers = 5
     var i = 0
 
-    def newCompiler(): Global with Extensions = {
+    def newCompiler(): Global with CompilerExtensions = {
       val settings = new Settings(Console.println)
       settings.usejavacp.value = false
       settings.classpath.value = "dist_2.10.0/lib/scala-library.jar"
       val reporter = new StoreReporter()
-      new Global(settings, reporter) with Extensions {}
+      new Global(settings, reporter) with CompilerExtensions {}
     }
 
     val compilers = new RoundRobin(
@@ -423,7 +460,13 @@ trait PIGIndex extends StringSimilarity {
         w.start()
       })
 
-    val futures = files.map { f => workers.next() !! ParseFile(f) }
+    val futures = files.flatMap { f =>
+      val md5 = FileUtils.md5(f)
+      findFileNodeByMd5(graphDb, md5) match {
+        case Some(_) => println(s"skipping duplicate file $f"); None
+        case None => Some(workers.next() !! ParseFile(f, md5))
+      }
+    }
     val results = futures.map{f => f()}
     compilers.foreach{ _.askShutdown() }
     workers.foreach { _ ! Die() }
@@ -476,7 +519,7 @@ class PIG(
                   names: List[String],
                   maxResults: Int) => {
                   val suggestions = ImportSuggestions(
-                    names.map(findTypeSuggestions(_, maxResults)))
+                    names.map(findTypeSuggestions(graphDb, _, maxResults)))
                   project ! RPCResultEvent(toWF(suggestions), callId)
                 }
                 case PublicSymbolSearchReq(
@@ -532,7 +575,7 @@ object PIG extends PIGIndex {
     }
     Util.foreachInputLine { line =>
       val name = line
-      for (l <- findOccurences(name, 20)) {
+      for (l <- findOccurences(graphDb, name, 20)) {
         println(l)
       }
     }
