@@ -44,28 +44,34 @@ class PackageInfo(
   val fullname: String,
   override val members: Iterable[EntityInfo]) extends EntityInfo(name, members) {}
 
-trait SymbolSearchResult {
+trait IndexSearchResult {
   val name: String
   val localName: String
   val declaredAs: scala.Symbol
   val pos: Option[(String, Int)]
 }
 
+case class SymbolSearchResult(
+  val name: String,
+  val localName: String,
+  val declaredAs: scala.Symbol,
+  val pos: Option[(String, Int)]) extends IndexSearchResult
+
 case class TypeSearchResult(
   val name: String,
   val localName: String,
   val declaredAs: scala.Symbol,
-  val pos: Option[(String, Int)]) extends SymbolSearchResult
+  val pos: Option[(String, Int)]) extends IndexSearchResult
 
 case class MethodSearchResult(
   val name: String,
   val localName: String,
   val declaredAs: scala.Symbol,
   val pos: Option[(String, Int)],
-  val owner: String) extends SymbolSearchResult
+  val owner: String) extends IndexSearchResult
 
-case class ImportSuggestions(symLists: Iterable[Iterable[SymbolSearchResult]])
-case class SymbolSearchResults(syms: Iterable[SymbolSearchResult])
+case class ImportSuggestions(symLists: Iterable[Iterable[IndexSearchResult]])
+case class SymbolSearchResults(syms: Iterable[IndexSearchResult])
 
 case class SymbolDesignations(
   val file: String,
@@ -261,7 +267,6 @@ trait ModelBuilders { self: RichPresentationCompiler =>
       indexer !? (1000, SourceFileCandidatesReq(pack, name)) match {
         case Some(files: Set[File]) => {
           files.flatMap { f =>
-	    println("Linking:" + (sym, f))
             askLinkPos(sym, f.getAbsolutePath)
           }.filter(_.isDefined).headOption.getOrElse(NoPosition)
         }

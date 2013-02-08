@@ -226,7 +226,7 @@ trait ProtocolConversions {
   def toWF(value: TypeInspectInfo): WireFormat
   def toWF(value: SymbolSearchResults): WireFormat
   def toWF(value: ImportSuggestions): WireFormat
-  def toWF(value: SymbolSearchResult): WireFormat
+  def toWF(value: IndexSearchResult): WireFormat
   def toWF(value: Position): WireFormat
   def toWF(value: RangePosition): WireFormat
   def toWF(value: FileRange): WireFormat

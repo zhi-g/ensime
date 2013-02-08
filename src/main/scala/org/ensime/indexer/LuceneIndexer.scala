@@ -72,7 +72,7 @@ import scala.actors._
 import scala.actors.Actor._
 import org.ensime.model.{
   TypeInfo,
-  SymbolSearchResult,
+  IndexSearchResult,
   TypeSearchResult,
   MethodSearchResult,
   SymbolSearchResults,
@@ -206,7 +206,7 @@ object LuceneIndex extends StringSimilarity {
       !(proposed -- onDisk.toList).isEmpty)
   }
 
-  private def buildDoc(value: SymbolSearchResult): Document = {
+  private def buildDoc(value: IndexSearchResult): Document = {
     val doc = new Document()
 
     doc.add(new Field("tags",
@@ -255,7 +255,7 @@ object LuceneIndex extends StringSimilarity {
     doc
   }
 
-  private def buildSym(d: Document): SymbolSearchResult = {
+  private def buildSym(d: Document): IndexSearchResult = {
     val name = d.get("name")
     val localName = d.get("localName")
     val tpe = scala.Symbol(d.get("type"))
@@ -451,24 +451,24 @@ trait LuceneIndex {
   def keywordSearch(
     keywords: Iterable[String],
     maxResults: Int = 0,
-    restrictToTypes: Boolean = false): List[SymbolSearchResult] = {
-    var results = new ListBuffer[SymbolSearchResult]
+    restrictToTypes: Boolean = false): List[IndexSearchResult] = {
+    var results = new ListBuffer[IndexSearchResult]
     search(keywords, maxResults, restrictToTypes, false,
-      {(r: SymbolSearchResult) =>
+      {(r: IndexSearchResult) =>
         results += r
       })
     results.toList
   }
 
   def getImportSuggestions(typeNames: Iterable[String],
-    maxResults: Int = 0): List[List[SymbolSearchResult]] = {
-    def suggestions(typeName: String): List[SymbolSearchResult] = {
+    maxResults: Int = 0): List[List[IndexSearchResult]] = {
+    def suggestions(typeName: String): List[IndexSearchResult] = {
       val keywords = typeName::Tokens.splitTypeName(typeName)
-      val candidates = new HashSet[SymbolSearchResult]
+      val candidates = new HashSet[IndexSearchResult]
 
       search(keywords,
 	maxResults, true, true,
-        (r: SymbolSearchResult) =>
+        (r: IndexSearchResult) =>
         r match {
           case r: TypeSearchResult => candidates += r
           case _ => // nothing
@@ -488,7 +488,7 @@ trait LuceneIndex {
   }
 
 
-  def insert(value: SymbolSearchResult): Unit = {
+  def insert(value: IndexSearchResult): Unit = {
     for (w <- indexWriter) {
       val doc = buildDoc(value)
       w.updateDocument(new Term("name", value.name), doc)
@@ -517,7 +517,7 @@ trait LuceneIndex {
     maxResults: Int,
     restrictToTypes: Boolean,
     fuzzy: Boolean,
-    receiver: (SymbolSearchResult => Unit)): Unit = {
+    receiver: (IndexSearchResult => Unit)): Unit = {
 
     val preparedKeys = keys.filter(!_.isEmpty).map(_.toLowerCase)
     val field = if (restrictToTypes) "localNameTags" else "tags"
@@ -548,7 +548,7 @@ trait LuceneIndex {
   private def searchByQuery(
     q: Query,
     maxResults: Int,
-    receiver: (SymbolSearchResult => Unit)): Unit = {
+    receiver: (IndexSearchResult => Unit)): Unit = {
     if (indexReader.isEmpty) {
       indexReader = Some(IndexReader.open(index))
     }

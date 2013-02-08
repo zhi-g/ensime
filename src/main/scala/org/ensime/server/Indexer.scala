@@ -33,7 +33,7 @@ import org.ensime.indexer.ClassFileIndex
 import org.ensime.indexer.LuceneIndex
 import org.objectweb.asm.ClassReader
 import org.ensime.model.{
-  ImportSuggestions, MethodSearchResult, SymbolSearchResult,
+  ImportSuggestions, MethodSearchResult, IndexSearchResult,
   SymbolSearchResults, TypeInfo, TypeSearchResult}
 import org.ensime.protocol.ProtocolConst._
 import org.ensime.protocol.ProtocolConversions
@@ -47,7 +47,7 @@ case class RebuildStaticIndexReq()
 case class TypeCompletionsReq(prefix: String, maxResults: Int)
 case class SourceFileCandidatesReq(enclosingPackage: String,
   classNamePrefix: String)
-case class AddSymbolsReq(syms: Iterable[SymbolSearchResult])
+case class AddSymbolsReq(syms: Iterable[IndexSearchResult])
 case class RemoveSymbolsReq(syms: Iterable[String])
 case class ReindexClassFilesReq(files: Iterable[File])
 case class CommitReq()
@@ -91,7 +91,7 @@ class Indexer(
           case CommitReq() => {
             index.commit()
           }
-          case AddSymbolsReq(syms: Iterable[SymbolSearchResult]) => {
+          case AddSymbolsReq(syms: Iterable[IndexSearchResult]) => {
             syms.foreach { info =>
               index.insert(info)
             }
@@ -213,7 +213,7 @@ trait IndexerInterface { self: RichPresentationCompiler =>
     indexer ! RemoveSymbolsReq(keys)
   }
 
-  private implicit def symToSearchResult(sym: Symbol): SymbolSearchResult = {
+  private implicit def symToSearchResult(sym: Symbol): IndexSearchResult = {
     val pos = if (sym.pos.isDefined) {
       Some((sym.pos.source.path, sym.pos.point))
     } else None
@@ -235,7 +235,7 @@ trait IndexerInterface { self: RichPresentationCompiler =>
   }
 
   def indexTopLevelSyms(syms: Iterable[Symbol]) {
-    val infos = new ArrayBuffer[SymbolSearchResult]
+    val infos = new ArrayBuffer[IndexSearchResult]
     for (sym <- syms) {
       if (Indexer.isValidType(typeSymName(sym))) {
         val key = lookupKey(sym)

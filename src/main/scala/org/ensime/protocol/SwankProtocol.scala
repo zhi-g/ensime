@@ -2728,7 +2728,7 @@ trait SwankProtocol extends Protocol {
     }
   }
 
-  def toWF(value: SymbolSearchResult): SExp = {
+  def toWF(value: IndexSearchResult): SExp = {
     value match {
       case value: TypeSearchResult => {
         SExp.propList(

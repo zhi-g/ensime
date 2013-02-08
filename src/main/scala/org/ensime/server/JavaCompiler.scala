@@ -67,7 +67,7 @@ class JavaCompiler(
     private val knownPackages = new mutable.HashSet[String]()
 
     def addClassFiles(classFiles: Iterable[ClassFile]) {
-      val infos = new ArrayBuffer[SymbolSearchResult]
+      val infos = new ArrayBuffer[IndexSearchResult]
       for (cf <- classFiles) {
         val byteStream = new ByteArrayOutputStream()
         byteStream.write(cf.header, 0, cf.headerOffset)

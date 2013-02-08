@@ -32,7 +32,7 @@ import scala.tools.nsc.util.{ Position, RangePosition, SourceFile, BatchSourceFi
 import org.ensime.util.Arrays
 import scala.tools.nsc.interactive.{ Response, CompilerControl, Global }
 import scala.collection.mutable.{ ListBuffer, LinkedHashSet }
-import org.ensime.model.{ CompletionInfo, CompletionSignature, SymbolSearchResult }
+import org.ensime.model.{ CompletionInfo, CompletionSignature, IndexSearchResult }
 
 trait CompletionControl {
   self: RichPresentationCompiler =>
@@ -79,7 +79,7 @@ trait CompletionControl {
     def makeTypeSearchCompletions(prefix: String): List[CompletionInfo] = {
       val req = TypeCompletionsReq(prefix, maxResults)
       indexer !? (1000, req) match {
-        case Some(syms: List[SymbolSearchResult]) => {
+        case Some(syms: List[IndexSearchResult]) => {
           syms.map { s =>
             CompletionInfo(s.localName, CompletionSignature(List(), s.name),
 	      -1, false, 40, Some(s.name))

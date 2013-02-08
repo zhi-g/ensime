@@ -31,6 +31,8 @@ import java.io.File
 import org.ensime.config.ProjectConfig
 import org.ensime.indexer.Tokens
 import org.ensime.model.ImportSuggestions
+import org.ensime.model.IndexSearchResult
+import org.ensime.model.SymbolSearchResult
 import org.ensime.model.TypeSearchResult
 import org.ensime.protocol.ProtocolConversions
 import org.ensime.util.{FileUtils, Profiling, StringSimilarity, Util}
@@ -73,22 +75,26 @@ trait PIGIndex extends StringSimilarity {
   val PropOffset = "offset"
   val PropDeclaredAs = "declaredAs"
 
-  case class TypeNode(node: Node) {
+  trait AbstractSymbolNode {
+    def node: Node
     def name = node.getProperty(PropName).asInstanceOf[String]
     def localName = node.getProperty(PropName).asInstanceOf[String]
-    def offset = node.getProperty(PropOffset).asInstanceOf[Integer]
+    def offset = node.getProperty(PropOffset, 0).asInstanceOf[Integer]
     def declaredAs =
-      scala.Symbol(node.getProperty(PropDeclaredAs).asInstanceOf[String])
+      scala.Symbol(node.getProperty(PropDeclaredAs, "sym").asInstanceOf[String])
   }
-  type TpeNode = TypeNode
+
+  case class SymbolNode(node: Node) extends AbstractSymbolNode {}
+
+  case class PackageNode(node: Node) extends AbstractSymbolNode {
+    def path = node.getProperty(PropPath).asInstanceOf[String]
+  }
 
   case class FileNode(node: Node) {
     def path = node.getProperty(PropPath).asInstanceOf[String]
   }
 
-  case class PackageNode(node: Node) {
-    def path = node.getProperty(PropPath).asInstanceOf[String]
-  }
+
 
   val NodeTypeFile = "file"
   val NodeTypePackage = "package"
@@ -161,7 +167,7 @@ trait PIGIndex extends StringSimilarity {
     val candidates = result.flatMap { row =>
       (row.get("n"), row.get("x"), row.get("y")) match {
         case (Some(tpeNode:Node), Some(fileNode:Node), Some(packNode:Node)) => {
-          val tpe = TypeNode(tpeNode)
+          val tpe = SymbolNode(tpeNode)
           val file = FileNode(fileNode)
           val pack = PackageNode(packNode)
           Some(TypeSearchResult(
@@ -180,6 +186,29 @@ trait PIGIndex extends StringSimilarity {
       if (d1 == d2) a.name.length < b.name.length
       else d1 < d2
     }
+  }
+
+  def findOccurences(
+      name:String, maxResults: Int): Iterable[IndexSearchResult] = {
+    val luceneQuery = "nameTokens:" + name.toLowerCase
+    val query = s"""START n=node:scopeIndex('$luceneQuery')
+                    MATCH n-[:containedBy*1..5]->x
+                    WHERE x.nodeType='file'
+                    RETURN n,x LIMIT $maxResults"""
+    val engine = new ExecutionEngine(graphDb)
+    val result = engine.execute(query)
+    result.flatMap { row =>
+      (row.get("n"), row.get("x")) match {
+        case (Some(symNode:Node), Some(fileNode:Node)) => {
+          val scope = SymbolNode(symNode)
+          val file = FileNode(fileNode)
+          Some(SymbolSearchResult(
+            scope.name, scope.localName, scope.declaredAs,
+            Some((file.path, scope.offset))))
+        }
+        case _ => None
+      }
+    }.toIterable
   }
 
   private def findFileNode(db: GraphDatabaseService, f: File): Node = {
@@ -239,6 +268,7 @@ trait PIGIndex extends StringSimilarity {
                 node.setProperty(PropNodeType, NodeTypePackage)
                 val fullName = pid.qualifier.toString + "." + pid.name.decode
                 node.setProperty(PropPath, fullName)
+                node.setProperty(PropOffset, treeP.startOrPoint)
                 tokenStack.top += fullName.toLowerCase
                 node.createRelationshipTo(stack.top, RelContainedBy)
                 descendWithContext(t, node)
@@ -250,6 +280,7 @@ trait PIGIndex extends StringSimilarity {
                   node.setProperty(PropNodeType, NodeTypeImport)
                   val importedName = impSel.name.decode
                   node.setProperty(PropName, importedName)
+                  node.setProperty(PropOffset, treeP.startOrPoint)
                   tokenStack.top + importedName
                   node.createRelationshipTo(stack.top, RelContainedBy)
                 }
@@ -291,6 +322,7 @@ trait PIGIndex extends StringSimilarity {
                 node.setProperty(PropNodeType, NodeTypeType)
                 node.setProperty(PropName, name.decode)
                 node.createRelationshipTo(stack.top, RelContainedBy)
+                node.setProperty(PropOffset, treeP.startOrPoint)
                 tokenStack.top += name.decode
                 val isField =
                   stack.top.getProperty(PropNodeType) == NodeTypeType
@@ -313,6 +345,7 @@ trait PIGIndex extends StringSimilarity {
                 val node = db.createNode()
                 node.setProperty(PropNodeType, NodeTypeMethod)
                 node.setProperty(PropName, name.decode)
+                node.setProperty(PropOffset, treeP.startOrPoint)
                 node.createRelationshipTo(stack.top, RelContainedBy)
                 descendWithContext(t, node)
               }
@@ -499,7 +532,7 @@ object PIG extends PIGIndex {
     }
     Util.foreachInputLine { line =>
       val name = line
-      for (l <- findTypeSuggestions(name, 20)) {
+      for (l <- findOccurences(name, 20)) {
         println(l)
       }
     }
