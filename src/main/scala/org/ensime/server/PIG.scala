@@ -38,6 +38,7 @@ import org.ensime.protocol.ProtocolConversions
 import org.ensime.util.{FileUtils, Profiling, StringSimilarity, Util}
 import org.neo4j.cypher.ExecutionEngine
 import org.neo4j.cypher.ExecutionResult
+import org.neo4j.graphdb.Relationship
 import org.neo4j.graphdb.Transaction
 import org.neo4j.graphdb.{DynamicRelationshipType, GraphDatabaseService, Node}
 import org.neo4j.graphdb.factory.GraphDatabaseFactory
@@ -78,10 +79,15 @@ trait PIGIndex extends StringSimilarity {
   val PropOffset = "offset"
   val PropDeclaredAs = "declaredAs"
 
-  trait AbstractSymbolNode {
+  trait RichNode {
     def node: Node
-    def name = node.getProperty(PropName).asInstanceOf[String]
-    def localName = node.getProperty(PropName).asInstanceOf[String]
+  }
+
+  implicit def richNodeToNode(richNode: RichNode): Node = richNode.node
+
+  trait AbstractSymbolNode extends RichNode {
+    def name = node.getProperty(PropName, "").asInstanceOf[String]
+    def localName = node.getProperty(PropName, "").asInstanceOf[String]
     def offset = node.getProperty(PropOffset, 0).asInstanceOf[Integer]
     def declaredAs =
       scala.Symbol(node.getProperty(PropDeclaredAs, "sym").asInstanceOf[String])
@@ -89,17 +95,15 @@ trait PIGIndex extends StringSimilarity {
 
   case class SymbolNode(node: Node) extends AbstractSymbolNode {}
 
-  case class PackageNode(node: Node) extends AbstractSymbolNode {
-    def path = node.getProperty(PropPath).asInstanceOf[String]
-  }
+  case class PackageNode(node: Node) extends AbstractSymbolNode {}
 
-  case class FileNode(node: Node) {
-    def path = node.getProperty(PropPath).asInstanceOf[String]
+  case class FileNode(node: Node) extends RichNode {
+    def path = node.getProperty(PropPath, "").asInstanceOf[String]
+    def md5 = Option(node.getProperty(PropMd5, null).asInstanceOf[String])
   }
 
   case class DbInTransaction(
     db: GraphDatabaseService, transaction: Transaction) {}
-
 
   val NodeTypeFile = "file"
   val NodeTypePackage = "package"
@@ -119,9 +123,10 @@ trait PIGIndex extends StringSimilarity {
   val RelFileOf = DynamicRelationshipType.withName("fileOf")
 
   protected def graphDb: GraphDatabaseService
-  protected def fileIndex : Index[Node]
-  protected def tpeIndex : Index[Node]
-  protected def scopeIndex : Index[Node]
+  protected def fileIndex: Index[Node]
+  protected def tpeIndex: Index[Node]
+  protected def scopeIndex: Index[Node]
+  protected def scalaLibraryJar: File
 
   protected def createDefaultGraphDb =
     (new GraphDatabaseFactory()).newEmbeddedDatabase("neo4j-db")
@@ -149,15 +154,6 @@ trait PIGIndex extends StringSimilarity {
     }
   }
 
-  private def foreachHit(hits: IndexHits[Node]) (f: Node => Unit) = {
-    import scala.collection.JavaConversions
-    try {
-      JavaConversions.iterableAsScalaIterable(hits).foreach(f)
-    } finally {
-      hits.close()
-    }
-  }
-
   private def executeQuery(
       db: GraphDatabaseService, q: String): ExecutionResult = {
     val engine = new ExecutionEngine(graphDb)
@@ -170,10 +166,11 @@ trait PIGIndex extends StringSimilarity {
     val keys = Tokens.splitTypeName(typeName).
       filter(!_.isEmpty).map(_.toLowerCase)
     val luceneQuery = keys.map("nameTokens:" + _).mkString(" OR ")
-    val result = executeQuery(db, s"""START n=node:tpeIndex('$luceneQuery')
-                    MATCH n-[:containedBy*1..5]->x, n-[:containedBy*1..5]->y
-                    WHERE x.nodeType='file' and y.nodeType='package'
-                    RETURN n,x,y LIMIT $maxResults""")
+    val result = executeQuery(
+      db, s"""START n=node:tpeIndex('$luceneQuery')
+              MATCH n-[:containedBy*1..5]->x, n-[:containedBy*1..5]->y
+              WHERE x.nodeType='file' and y.nodeType='package'
+              RETURN n,x,y LIMIT $maxResults""")
     val candidates = result.flatMap { row =>
       (row.get("n"), row.get("x"), row.get("y")) match {
         case (Some(tpeNode:Node), Some(fileNode:Node), Some(packNode:Node)) => {
@@ -181,7 +178,7 @@ trait PIGIndex extends StringSimilarity {
           val file = FileNode(fileNode)
           val pack = PackageNode(packNode)
           Some(TypeSearchResult(
-            pack.path + "." + tpe.name, tpe.localName, tpe.declaredAs,
+            pack.name + "." + tpe.name, tpe.localName, tpe.declaredAs,
             Some((file.path, tpe.offset))))
         }
         case _ => None
@@ -221,18 +218,18 @@ trait PIGIndex extends StringSimilarity {
   }
 
   private def findFileNodeByMd5(
-      db: GraphDatabaseService, md5: String): Option[Node] = {
+      db: GraphDatabaseService, md5: String): Option[FileNode] = {
     JavaConversions.iterableAsScalaIterable(
-      fileIndex.get(PropMd5, md5)).headOption
+      fileIndex.get(PropMd5, md5)).headOption.map(FileNode.apply)
   }
 
-  private def findOrCreateFileNode(tx: DbInTransaction, f: File): Node = {
+  private def findOrCreateFileNode(tx: DbInTransaction, f: File): FileNode = {
     val fileNode = JavaConversions.iterableAsScalaIterable(
       fileIndex.get(PropPath, f.getAbsolutePath)).headOption
     fileNode match {
-      case Some(node) => node
+      case Some(node) => new FileNode(node)
       case None => {
-        val node = tx.db.createNode()
+        val node = new FileNode(tx.db.createNode())
         node.setProperty(PropPath, f.getAbsolutePath)
         node.setProperty(PropNodeType, NodeTypeFile)
         fileIndex.putIfAbsent(node, PropPath, f.getAbsolutePath)
@@ -241,26 +238,29 @@ trait PIGIndex extends StringSimilarity {
     }
   }
 
-  private def purgeFileContents(tx: DbInTransaction, fileNode: Node) = {
+  private def purgeFileSubgraph(tx: DbInTransaction, fileNode: Node) = {
     val path = fileNode.getProperty(PropPath)
-    executeQuery(tx.db,
-      s"""START n=node:fileIndex($PropPath=$path)
-       MATCH n-[:containedBy*1..5]->x
-       DELETE n""")
+    val result = executeQuery(tx.db,
+      s"""START n=node:fileIndex($PropPath='$path')
+       MATCH x-[:containedBy*1..5]->n
+       WITH x
+       MATCH x-[r]-()
+       DELETE r,x""")
+    println(s"Purged ${result.queryStatistics.deletedNodes} nodes.")
   }
 
-  private def refreshFileNodeContents(
-      tx: DbInTransaction, fileNode: Node, md5:String): Node = {
-    if (fileNode.hasProperty(PropMd5)) {
-      // File already existed.
-      fileIndex.remove(fileNode, PropMd5, fileNode.getProperty(PropMd5))
-      purgeFileContents(tx, fileNode)
+  private def prepareFileForNewContents(
+      tx: DbInTransaction, fileNode: FileNode, md5:String): Node = {
+    fileNode.md5.foreach { md5 =>
+      // File had prior existence. Purge the file from the graph.
+      fileIndex.remove(fileNode, PropMd5, md5)
+      purgeFileSubgraph(tx, fileNode)
     }
+    // Stamp with new contents fingerprint. Ready for new subgraph.
     fileNode.setProperty(PropMd5, md5)
     fileIndex.add(fileNode, PropMd5, md5)
     fileNode
   }
-
 
   trait CompilerExtensions { self: Global =>
     import scala.tools.nsc.symtab.Flags._
@@ -297,12 +297,11 @@ trait PIGIndex extends StringSimilarity {
         if (!treeP.isTransparent) {
           try {
             t match {
-
               case PackageDef(pid, stats) => {
                 val node = tx.db.createNode()
                 node.setProperty(PropNodeType, NodeTypePackage)
                 val fullName = pid.qualifier.toString + "." + pid.name.decode
-                node.setProperty(PropPath, fullName)
+                node.setProperty(PropName, fullName)
                 node.setProperty(PropOffset, treeP.startOrPoint)
                 tokenStack.top += fullName.toLowerCase
                 node.createRelationshipTo(stack.top, RelContainedBy)
@@ -423,11 +422,12 @@ trait PIGIndex extends StringSimilarity {
         receive {
           case ParseFile(f: File, md5: String) => {
             doTx { tx =>
+              // Get existing file if present (contents may have been updated):
               val fileNode = findOrCreateFileNode(tx, f)
-              refreshFileNodeContents(tx, fileNode, md5)
+              prepareFileForNewContents(tx, fileNode, md5)
               val sf = compiler.getSourceFile(f.getAbsolutePath())
+              println("Adding " + f)
               val tree = compiler.quickParse(sf)
-              println("parsed " + f)
               val traverser = new compiler.TreeTraverser(fileNode, tx)
               traverser.traverse(tree)
             }
@@ -442,12 +442,11 @@ trait PIGIndex extends StringSimilarity {
   def index(files: Set[File]) {
     val MaxCompilers = 5
     val MaxWorkers = 5
-    var i = 0
 
     def newCompiler(): Global with CompilerExtensions = {
       val settings = new Settings(Console.println)
       settings.usejavacp.value = false
-      settings.classpath.value = "dist_2.10.0/lib/scala-library.jar"
+      settings.classpath.value = scalaLibraryJar.getAbsolutePath
       val reporter = new StoreReporter()
       new Global(settings, reporter) with CompilerExtensions {}
     }
@@ -464,7 +463,16 @@ trait PIGIndex extends StringSimilarity {
     val futures = files.flatMap { f =>
       val md5 = FileUtils.md5(f)
       findFileNodeByMd5(graphDb, md5) match {
-        case Some(_) => println(s"skipping duplicate file $f"); None
+        case Some(fileNode) => {
+          if (fileNode.path != f.getAbsolutePath) {
+            // File contents are identical, but name has changed.
+            doTx { tx =>
+              fileNode.setProperty(PropPath, f.getAbsolutePath)
+            }
+          }
+          None
+        }
+        // File contents not found.
         case None => Some(workers.next() !! ParseFile(f, md5))
       }
     }
@@ -491,11 +499,14 @@ class PIG(
   import org.ensime.protocol.ProtocolConst._
   import protocol._
 
-
   var graphDb: GraphDatabaseService = null
   var fileIndex: Index[Node] = null
   var tpeIndex: Index[Node] = null
   var scopeIndex: Index[Node] = null
+  var scalaLibraryJar: File =
+    config.scalaLibraryJar.getOrElse(
+      throw new RuntimeException(
+        "PIG requires that the scala library jar be specified."))
 
   def act() {
     val factory = new GraphDatabaseFactory()
@@ -567,6 +578,7 @@ object PIG extends PIGIndex {
   var fileIndex: Index[Node] = createDefaultFileIndex(graphDb)
   var tpeIndex: Index[Node] = createDefaultTypeIndex(graphDb)
   var scopeIndex: Index[Node] = createDefaultScopeIndex(graphDb)
+  var scalaLibraryJar: File = new File("dist_2.10.0/lib/scala-library.jar")
 
   def main(args: Array[String]) {
     System.setProperty("actors.corePoolSize", "10")
@@ -576,7 +588,7 @@ object PIG extends PIGIndex {
     }
     Util.foreachInputLine { line =>
       val name = line
-      for (l <- findOccurences(graphDb, name, 20)) {
+      for (l <- findTypeSuggestions(graphDb, name, 20)) {
         println(l)
       }
     }

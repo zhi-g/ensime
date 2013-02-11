@@ -198,7 +198,6 @@ object LuceneIndex extends StringSimilarity {
     version: Int,
     onDisk: Set[(String, String)],
     proposed: Set[(String, String)]): Boolean = {
-
     // Very conservative.
     // Re-index whenver the proposed set
     // contains unindexed files.
