@@ -56,6 +56,10 @@ case class PatchSourceReq(file: File, edits: List[PatchOp])
 case class RemoveFileReq(file: File)
 case class CompletionsReq(
   file: File, point: Int, maxResults: Int, caseSens: Boolean, reload: Boolean)
+//Macros
+case class MacroExpansionReq(file: String, line: Int) //nothing for now but later we can ask only the expansions for specific file
+case class MacroMarkerReq(file: String)
+
 case class ImportSuggestionsReq(
   file: File, point: Int, names: List[String], maxResults: Int)
 case class PublicSymbolSearchReq(names: List[String], maxResults: Int)
@@ -203,12 +207,12 @@ class Project(val protocol: Protocol) extends Actor with RPCTarget {
     }
     indexer match{
       case Some(indexer) => {
-	val newAnalyzer = new Analyzer(this, indexer, protocol, config)
-	newAnalyzer.start
-	analyzer = Some(newAnalyzer)
+        val newAnalyzer = new Analyzer(this, indexer, protocol, config)
+	      newAnalyzer.start
+	      analyzer = Some(newAnalyzer)
       }
       case None => {
-	throw new RuntimeException("Indexer must be started before analyzer.")
+	      throw new RuntimeException("Indexer must be started before analyzer.")
       }
     }
   }

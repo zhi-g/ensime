@@ -100,6 +100,19 @@ case class CompletionInfoList(
   val prefix: String,
   val completions: List[CompletionInfo]) {}
 
+/*
+ * Macro expansions
+ */
+case class MacroExpansion(
+  val sourcePosition: SourcePosition,
+  val expansion: String){}
+
+case class MacroMarker(
+  val sourcePosition: SourcePosition){}
+
+case class MacroMarkerList(
+  val macroPositions: List[MacroMarker]){}
+
 trait PatchOp {
   val start: Int
 }

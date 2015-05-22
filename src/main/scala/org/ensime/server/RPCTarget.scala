@@ -187,6 +187,16 @@ trait RPCTarget { self: Project =>
       CompletionsReq(new File(f), point, maxResults, caseSens, reload), callId)
   }
 
+  // Macro expansion
+  def rpcMacroExpansion(file: String, line: Int, callId: Int): Unit = {
+    getAnalyzer ! RPCRequestEvent (MacroExpansionReq(file, line), callId)
+  }
+
+  def rpcMacroPositions(file: String, callId:Int) {
+    getAnalyzer ! RPCRequestEvent(MacroMarkerReq(file), callId)
+  }
+
+
   def rpcPackageMemberCompletion(path: String, prefix: String, callId: Int) {
     getAnalyzer ! RPCRequestEvent(PackageMemberCompletionReq(path, prefix), callId)
   }

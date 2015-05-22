@@ -202,6 +202,18 @@ class Analyzer(
                       p, maxResults, caseSens)
                     project ! RPCResultEvent(toWF(info), callId)
                   }
+                  
+                  //Macros expansion
+                  case MacroExpansionReq(file: String, line: Int) => {
+                    println("MacroExpansion request")
+                    val macrosExpansion = scalaCompiler.askMacroExpansion(file, line)
+                    project ! RPCResultEvent(toWF(macrosExpansion), callId)
+                  }
+                  case MacroMarkerReq(file: String) => {
+                    println("MacroMarker reques")
+                    val positions = scalaCompiler.askMacroMarkers(file)
+                    project ! RPCResultEvent(toWF(positions), callId)
+                  }
 
                   case ImportSuggestionsReq(_, _, _, _) => {
                     indexer ! rpcReq

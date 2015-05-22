@@ -578,6 +578,7 @@ trait SwankProtocol extends Protocol {
        *   :version "0.7")) 42)
        */
       case "swank:connection-info" => {
+        println("SwankProtocol - swank:connection-info")
         sendRPCReturn(toWF(new ConnectionInfo()), callId)
       }
 
@@ -607,6 +608,7 @@ trait SwankProtocol extends Protocol {
        *   "/Users/aemon/projects/ensime/src/main/java"))) 42)
        */
       case "swank:init-project" => {
+        println("SwankProtocol - swank:init-project")
         form match {
           case SExpList(head :: (conf: SExpList) :: body) => {
             ProjectConfig.fromSExp(conf) match {
@@ -1000,6 +1002,50 @@ trait SwankProtocol extends Protocol {
           case _ => oops
         }
       }
+
+      /**
+       * Summary:
+       *  Return the macro expansions in the project
+       * Arguments: 
+       *  path to the file where the macro we want to expand is
+       *  line of the marco we want to expand.
+       * Return:
+       *  The expansion of the requested macro
+       * Example call: 
+       *  (:swank-rpc (swank:get-macro-expansion "path_to_the_file" line_of_the_macro) 42)
+       * (:return (:ok (:macro-expansion (:pos (:file "File1" :line $line_of_macro) :expansion expansion_string) 42)
+       */
+     case "swank:get-macro-expansion" => {
+        println("get-macro-expansion")
+        form match {
+          case SExpList(head :: StringAtom(file) :: IntAtom(line) :: body) => 
+            rpcTarget.rpcMacroExpansion(file, line, callId)
+        }
+
+        //rpcTarget.rpcMacroExpansion(callId)
+      }
+   /**
+       * Summary:
+       *  Return the macro expansions in the project
+       *
+       * Arguments: 
+       *  the path to the file which we want to inspect for macros
+       *
+       * Return:
+       *  The positions of macros in the requested file
+       *
+       * Example call: 
+       *  (:swank-rpc (swank:get-macro-positions "path_to_the_file") 42)
+       * (:return (:ok (:macro-positions ((:pos (:file "File1" :line $line_of_macro))
+       * (:pos (:file "File2" :line $line_of_macro))))) 42)
+       */      
+     case "swank:get-macro-postions" => {
+        println("get-macro-postions")
+        form match {
+          case SExpList(head :: StringAtom(file) :: body) => 
+            rpcTarget.rpcMacroPositions(file, callId)
+        } 
+     } 
 
       /**
        * Doc RPC:
@@ -2573,6 +2619,29 @@ trait SwankProtocol extends Protocol {
     SExp.propList(
       (":prefix", value.prefix),
       (":completions", SExpList(value.completions.map(toWF))))
+  }
+
+  //Macros
+  def toWF(value: MacroExpansion): SExp = {
+    println("Macro to WireFormat")
+    SExp(
+      ":macro-expansion", SExp.propList(
+        (":pos", toWF(value.sourcePosition)),
+        (":expansion", value.expansion)
+    ))
+  }
+
+  def toWF(value: MacroMarker): SExp = {
+    println("MacroMarker to WireFormat")
+    SExp.propList(
+      (":pos", toWF(value.sourcePosition)) 
+    )
+  }
+
+  def toWF(value: MacroMarkerList): SExp = {
+    SExp.propList(
+      ("macro-positions", SExpList(value.macroPositions.map(toWF)))
+    )
   }
 
   def toWF(value: PackageMemberInfoLight): SExp = {

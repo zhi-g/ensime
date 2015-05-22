@@ -41,6 +41,8 @@ object Server {
     System.setProperty("actors.corePoolSize", "10")
     System.setProperty("actors.maxPoolSize", "100")
 
+    println("Modified version of Ensime-server")
+
     args match {
       case Array(portfile) =>
         {

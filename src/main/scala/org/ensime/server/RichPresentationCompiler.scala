@@ -68,6 +68,7 @@ package org.ensime.server
 import java.io.File
 import org.ensime.config.ProjectConfig
 import org.ensime.model._
+import org.ensime.util.CanonFile
 import scala.actors.Actor._
 import scala.actors.Actor
 import scala.collection.mutable
@@ -175,6 +176,18 @@ trait RichCompilerControl extends CompilerControl with RefactoringControl with C
 
   def askCompletionsAt(p: Position, maxResults: Int, caseSens: Boolean): CompletionInfoList =
     completionsAt(p, maxResults, caseSens)
+
+  //Macros
+  def askMacroExpansion(file: String, line: Int): MacroExpansion = {
+    println("Ask for macro expansions")
+    expandMacro(file, line)
+  }
+
+  def askMacroMarkers(file: String): MacroMarkerList = {
+    println("Ask for macro positions")
+    detectMacroPositions(file)
+
+  }
 
   def askReloadAndTypeFiles(files: Iterable[SourceFile]) =
     askOption(reloadAndTypeFiles(files))
@@ -474,6 +487,70 @@ class RichPresentationCompiler(
       case None => List()
     }
   }
+  /*
+   * Returns the position of all the macros, in the given unit, if its active
+   *
+   */
+  protected def detectMacroPositions(file: String): MacroMarkerList = {
+    println("Detecting macro positions")
+    val units = activeUnits
+    val global = RichPresentationCompiler.this
+    var positions = List[MacroMarker]()
+
+    val extractMacroPositions = new Traverser {
+      override def traverse(tree: Tree): Unit = {
+        tree.attachments.get[global.MacroExpansionAttachment] match {
+          case Some(_) if tree.pos != NoPosition =>
+            positions = MacroMarker(SourcePosition(CanonFile(file), tree.pos.line)) :: positions
+          case None =>  super.traverse(tree)
+        }
+       
+      }
+    }
+
+    units.filter( u => u.source.path == file) match {
+      case u::Nil => 
+        println("File in macro positions found ")
+        extractMacroPositions(u.body)
+        MacroMarkerList(positions)
+      case Nil => 
+        println("ERROR: The file does not exist")
+        MacroMarkerList(List[MacroMarker]())
+    }
+  }
+
+  /*
+    Return the expansion of macro at positon <line> 
+  */
+  def expandMacro(file: String, line: Int): MacroExpansion = {
+    var expansion: MacroExpansion = MacroExpansion(SourcePosition(CanonFile(file), line), "")
+
+    val global = RichPresentationCompiler.this
+    val units = activeUnits
+
+    val findExpansionTraverser = new Traverser{
+      override def traverse(tree: Tree): Unit = {
+        tree.attachments.get[global.MacroExpansionAttachment] match {
+          case Some(_) if tree.pos != NoPosition && tree.pos.line == line =>
+            expansion = MacroExpansion(SourcePosition(CanonFile(file), line), global.show(tree))
+          case None => super.traverse(tree) 
+        }
+      }
+    }
+
+    units.filter(u => u.source.path == file) match {
+      case u::Nil => 
+        println("File found")
+        findExpansionTraverser.traverse(u.body)
+      case _ =>{ 
+        println("ERROR: The file does not exist")
+      }
+    }
+
+    expansion
+  }
+
+  
 
   private var notifyWhenReady = false
 
