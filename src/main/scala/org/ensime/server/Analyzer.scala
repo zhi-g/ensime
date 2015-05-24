@@ -207,11 +207,15 @@ class Analyzer(
                   case MacroExpansionReq(file: String, line: Int) => {
                     println("MacroExpansion request")
                     val macrosExpansion = scalaCompiler.askMacroExpansion(file, line)
+                    println("Positions found")
+                    println(toWF(macrosExpansion))
                     project ! RPCResultEvent(toWF(macrosExpansion), callId)
                   }
                   case MacroMarkerReq(file: String) => {
-                    println("MacroMarker reques")
+                    println("MacroMarker request")
                     val positions = scalaCompiler.askMacroMarkers(file)
+                    println("Positions found")
+                    println(toWF(positions))
                     project ! RPCResultEvent(toWF(positions), callId)
                   }
 
