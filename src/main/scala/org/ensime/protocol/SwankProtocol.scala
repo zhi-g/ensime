@@ -2640,7 +2640,7 @@ trait SwankProtocol extends Protocol {
 
   def toWF(value: MacroMarkerList): SExp = {
     SExp(
-      ":macro-positions", SExpList(value.macroPositions.map(toWF))
+      key(":macro-positions"), SExpList(value.macroPositions.map(m => toWF(m.sourcePosition)))
     )
   }
 
