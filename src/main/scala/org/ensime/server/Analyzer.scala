@@ -207,7 +207,7 @@ class Analyzer(
                   case MacroExpansionReq(file: String, line: Int) => {
                     println("MacroExpansion request")
                     val macrosExpansion = scalaCompiler.askMacroExpansion(file, line)
-                    println("Positions found")
+                    println("Expansion found")
                     println(toWF(macrosExpansion))
                     project ! RPCResultEvent(toWF(macrosExpansion), callId)
                   }

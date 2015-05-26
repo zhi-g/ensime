@@ -1015,8 +1015,8 @@ trait SwankProtocol extends Protocol {
        *  (:swank-rpc (swank:get-macro-expansion "path_to_the_file" line_of_the_macro) 42)
        * (:return (:ok (:macro-expansion (:pos (:file "File1" :line $line_of_macro) :expansion expansion_string) 42)
        */
-     case "swank:macro-expansion" => {
-        println("macro-expansion")
+     case "swank:expand-macro" => {
+        println("expand macros")
         form match {
           case SExpList(head :: StringAtom(file) :: IntAtom(line) :: body) => 
             rpcTarget.rpcMacroExpansion(file, line, callId)
@@ -2625,7 +2625,7 @@ trait SwankProtocol extends Protocol {
   def toWF(value: MacroExpansion): SExp = {
     println("Macro to WireFormat")
     SExp(
-      ":macro-expansion", SExp.propList(
+      key(":macro-expansion"), SExp.propList(
         (":pos", toWF(value.sourcePosition)),
         (":expansion", value.expansion)
     ))

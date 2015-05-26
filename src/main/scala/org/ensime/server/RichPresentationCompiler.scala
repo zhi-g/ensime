@@ -74,6 +74,7 @@ import scala.actors.Actor
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.tools.nsc.interactive.{ FreshRunReq, CompilerControl, Global, MissingResponse }
+import scala.reflect.internal.StdAttachments
 import scala.tools.nsc.util._
 import scala.tools.nsc.io.AbstractFile
 import scala.tools.nsc.reporters.Reporter
@@ -499,14 +500,24 @@ class RichPresentationCompiler(
 
     val extractMacroPositions = new Traverser {
       override def traverse(tree: Tree): Unit = {
-        tree.attachments.get[global.MacroExpansionAttachment] match {
+        println("tree has attachements " + !tree.attachments.all.isEmpty)
+        println("Tree is " + global.show(tree))
+        println(tree)
+        println(showRaw(tree))
+
+        tree.attachments.get[MacroExpansionAttachment] match {
           case Some(_) if tree.pos != NoPosition =>
+            println("macro detected")
             positions = MacroMarker(SourcePosition(CanonFile(file), tree.pos.line)) :: positions
-          case None =>  super.traverse(tree)
+          case None =>  
+            println("no macro here")
+            super.traverse(tree)
         }
-       
       }
     }
+
+    //positions = MacroMarker(SourcePosition(CanonFile(file), 5)) :: positions
+
 
     units.filter( u => u.source.path == file) match {
       case u::Nil => 
@@ -530,7 +541,7 @@ class RichPresentationCompiler(
 
     val findExpansionTraverser = new Traverser{
       override def traverse(tree: Tree): Unit = {
-        tree.attachments.get[global.MacroExpansionAttachment] match {
+        tree.attachments.get[MacroExpansionAttachment] match {
           case Some(_) if tree.pos != NoPosition && tree.pos.line == line =>
             expansion = MacroExpansion(SourcePosition(CanonFile(file), line), global.show(tree))
           case None => super.traverse(tree) 
