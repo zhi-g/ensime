@@ -108,7 +108,9 @@ case class MacroExpansion(
   val expansion: String){}
 
 case class MacroMarker(
-  val sourcePosition: SourcePosition){}
+  val sourcePosition: SourcePosition, val length: Int){}
+
+case class FileLength(val length: Int, val name: String){}
 
 case class MacroMarkerList(
   val macroPositions: List[MacroMarker]){}

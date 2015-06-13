@@ -1016,13 +1016,11 @@ trait SwankProtocol extends Protocol {
        * (:return (:ok (:macro-expansion (:pos (:file "File1" :line $line_of_macro) :expansion expansion_string) 42)
        */
      case "swank:expand-macro" => {
-        println("expand macros")
+        println("expand-macro")
         form match {
           case SExpList(head :: StringAtom(file) :: IntAtom(line) :: body) => 
             rpcTarget.rpcMacroExpansion(file, line, callId)
         }
-
-        //rpcTarget.rpcMacroExpansion(callId)
       }
    /**
        * Summary:
@@ -1040,13 +1038,19 @@ trait SwankProtocol extends Protocol {
        * (:pos (:file "File2" :line $line_of_macro))))) 42)
        */      
      case "swank:show-macros-in-file" => {
-        println("macro-postionSSSS")
+        println("show-macro-postions")
         form match {
           case SExpList(head :: StringAtom(file) :: body) => 
             rpcTarget.rpcMacroPositions(file, callId)
         } 
      } 
 
+     case "swank:get-file-length" => {
+      form match {
+        case SExpList(head :: StringAtom(file) :: body) => 
+          rpcTarget.rpcFileLength(file, callId)
+      }
+     }
       /**
        * Doc RPC:
        *   swank:completions
@@ -2248,7 +2252,7 @@ trait SwankProtocol extends Protocol {
   }
 
   def toWF(pos: SourcePosition): SExp = {
-    SExp(
+   SExp(
       key(":file"), pos.file.getAbsolutePath(),
       key(":line"), pos.line)
   }
@@ -2623,7 +2627,6 @@ trait SwankProtocol extends Protocol {
 
   //Macros
   def toWF(value: MacroExpansion): SExp = {
-    println("Macro to WireFormat")
     SExp(
       key(":macro-expansion"), SExp.propList(
         (":pos", toWF(value.sourcePosition)),
@@ -2631,17 +2634,22 @@ trait SwankProtocol extends Protocol {
     ))
   }
 
-  def toWF(value: MacroMarker): SExp = {
-    println("MacroMarker to WireFormat")
-    SExp.propList(
-      (":pos", toWF(value.sourcePosition)) 
-    )
-  }
-
   def toWF(value: MacroMarkerList): SExp = {
     SExp(
-      key(":macro-positions"), SExpList(value.macroPositions.map(m => toWF(m.sourcePosition)))
+      key(":macro-positions"), 
+      SExpList(value.macroPositions.map(m => 
+         SExp(
+          key(":file"), m.sourcePosition.file.getAbsolutePath(),
+          key(":line"), m.sourcePosition.line, 
+          key(":length"), m.length
+        )
+      )
+      )
     )
+  }
+  def toWF(value: FileLength): SExp = {
+    SExp(key(":file-length"), value.length, 
+      key(":file-name"), value.name)
   }
 
   def toWF(value: PackageMemberInfoLight): SExp = {

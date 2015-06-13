@@ -98,7 +98,7 @@ class DebugManager(project: Project, indexer: Actor,
   def ignoreErr[E <: Exception, T](action: => T, orElse: => T): T = {
     try { action } catch { case e: E => orElse }
   }
-
+  //Map a point within the executing code of the target VM to a source position
   def locToPos(loc: Location): Option[SourcePosition] = {
     try {
       (for (set <- sourceMap.get(loc.sourceName())) yield {

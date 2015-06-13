@@ -59,6 +59,7 @@ case class CompletionsReq(
 //Macros
 case class MacroExpansionReq(file: String, line: Int) //nothing for now but later we can ask only the expansions for specific file
 case class MacroMarkerReq(file: String)
+case class FileLengthReq(file: String)
 
 case class ImportSuggestionsReq(
   file: File, point: Int, names: List[String], maxResults: Int)

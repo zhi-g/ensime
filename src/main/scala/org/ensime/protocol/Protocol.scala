@@ -215,9 +215,9 @@ trait ProtocolConversions {
   def toWF(value: CompletionInfo): WireFormat
   def toWF(value: CompletionInfoList): WireFormat
   //Macros
-  def toWF(value: MacroMarker): WireFormat
   def toWF(value: MacroMarkerList): WireFormat
   def toWF(value: MacroExpansion): WireFormat
+  def toWF(value: FileLength): WireFormat
 
   def toWF(value: PackageMemberInfoLight): WireFormat
   def toWF(value: SymbolInfo): WireFormat

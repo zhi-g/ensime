@@ -196,6 +196,10 @@ trait RPCTarget { self: Project =>
     getAnalyzer ! RPCRequestEvent(MacroMarkerReq(file), callId)
   }
 
+  def rpcFileLength(file: String, callId: Int) {
+    getAnalyzer ! RPCRequestEvent(FileLengthReq(file), callId)
+  }
+
 
   def rpcPackageMemberCompletion(path: String, prefix: String, callId: Int) {
     getAnalyzer ! RPCRequestEvent(PackageMemberCompletionReq(path, prefix), callId)

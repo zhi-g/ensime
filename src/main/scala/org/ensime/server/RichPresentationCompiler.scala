@@ -180,14 +180,17 @@ trait RichCompilerControl extends CompilerControl with RefactoringControl with C
 
   //Macros
   def askMacroExpansion(file: String, line: Int): MacroExpansion = {
-    println("Ask for macro expansions")
+   // println("Ask for macro expansions")
     expandMacro(file, line)
   }
 
   def askMacroMarkers(file: String): MacroMarkerList = {
-    println("Ask for macro positions")
+   // println("Ask for macro positions")
     detectMacroPositions(file)
+  }
 
+  def askFileLength(file: String): FileLength = {
+    getFileLength(file)
   }
 
   def askReloadAndTypeFiles(files: Iterable[SourceFile]) =
@@ -500,15 +503,10 @@ class RichPresentationCompiler(
 
     val extractMacroPositions = new Traverser {
       override def traverse(tree: Tree): Unit = {
-        println("tree has attachements " + !tree.attachments.all.isEmpty)
-        println("Tree is " + global.show(tree))
-        println(tree)
-        println(showRaw(tree))
-
         tree.attachments.get[MacroExpansionAttachment] match {
           case Some(_) if tree.pos != NoPosition =>
-            println("macro detected")
-            positions = MacroMarker(SourcePosition(CanonFile(file), tree.pos.line)) :: positions
+            positions = MacroMarker(SourcePosition(CanonFile(file), tree.pos.line), 
+              lengthInLines(global.show(tree))) :: positions
           case None =>  
             println("no macro here")
             super.traverse(tree)
@@ -529,7 +527,10 @@ class RichPresentationCompiler(
         MacroMarkerList(List[MacroMarker]())
     }
   }
-
+  private def lengthInLines(text: String): Int = {
+    //addapt for other chars
+    text.count( _ == '\n') + 1
+  }
   /*
     Return the expansion of macro at positon <line> 
   */
@@ -545,6 +546,7 @@ class RichPresentationCompiler(
           case Some(_) if tree.pos != NoPosition && tree.pos.line == line =>
             expansion = MacroExpansion(SourcePosition(CanonFile(file), line), global.show(tree))
           case None => super.traverse(tree) 
+          case _ => 
         }
       }
     }
@@ -559,6 +561,20 @@ class RichPresentationCompiler(
     }
 
     expansion
+  }
+
+  def getFileLength(file: String): FileLength = {
+    val length = activeUnits.filter(_.source.path == file) match {
+      case f :: Nil => 
+        println("Sending length for file " + file)
+        f.source.asInstanceOf[BatchSourceFile].calculateLineIndices(f.source.content).length -2
+
+      case _ => 
+        println("ERROR: The file doesn't exist")
+        -1
+    }
+
+    FileLength(length, file)
   }
 
   
